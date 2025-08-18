@@ -19,7 +19,17 @@ status:{
     enum:['pending','approved','rejected'],
     default:'pending'
     
-}
+},
+encryption:{
+    algo:String,
+    keywrapped:String
+},
+reviewedBy:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:"User"
+},
+validUntil:Date,
+
 },{
     timestamps:true
 });
