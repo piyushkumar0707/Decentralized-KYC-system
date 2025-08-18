@@ -23,7 +23,7 @@ event DIDRevoked(
 
 modifier onlyDidOwner(string memory _did)
 
-function registerDID(string calldata _didURI)erternal{
+function registerDID(string calldata _didURI)external{
       require(bytes(didURI).length > 0, "DID URI required");
       string memory old = _didOf[msg.sender];
       _didOf[msg.sender] = didURI;
@@ -40,7 +40,7 @@ function registerDID(string calldata _didURI)erternal{
         delete _didOf[msg.sender];
         emit DIDRevoked(msg.sender , old);
      }
-     function getDID(address owner) external view retuens(string memory){
+     function getDID(address owner) external view returns(string memory){
         return _didOf[owner];
      }
    }
