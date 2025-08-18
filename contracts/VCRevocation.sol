@@ -79,4 +79,5 @@ fucntion anchorCredential(bytes32 vcHash) external onlyIssuer{
      function getRecord(bytes32 vcHash) external view returns(VCRecord memory){
         return _vc[vcHash];
      }
+     
  }
