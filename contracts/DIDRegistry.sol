@@ -13,7 +13,7 @@ event DIDRegistered(
 event DIDUpdated(
     address indexed owner , 
     string oldDidURI , 
-    string newDidURI
+    string newDidUR
 );
 
 event DIDRevoked(
