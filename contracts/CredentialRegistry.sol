@@ -4,80 +4,66 @@ pragma solidity ^0.8.20;
 import "./interfaces/IIssuerRegistry.sol";
 
 /**
- * @title VCRevocation
- * @notice Anchors a VC hash (bytes32) and supports revocation.
- *         Only approved issuers (from IssuerRegistry) can anchor/revoke.
- *         Stores no PII; only hashes + flags + timestamps.
+ * CredentialRegistry
+ * - anchors credential hashes (bytes32)
+ * - only approved issuers (via IssuerRegistry) can anchor/revoke
+ * - stores issuedAt, revoked flag and revokedAt
  */
+contract CredentialRegistry {
+    IIssuerRegistry public immutable issuerRegistry;
 
- contract VCRevocation{
-    IIsuerRegistry public immutable issuerRegistry;
-
-    struct VCRecord {
+    struct Credential {
         address issuer;
         uint64 issuedAt;
         bool revoked;
         uint64 revokedAt;
     }
-    // vcHash => VCRecord
-    mapping(bytes32 => VCRecord) private _vc;
 
-    event CredentialAnchored(
-        bytes32 indexed vcHash,
-        address indexed issuer,
-        uint256 timestamps
-        );
+    mapping(bytes32 => Credential) private credentials;
 
-    event CredentialRevoked(
-        bytes32 indexed vcHash , 
-        address indexed issuer , 
-        uint256 , timestamps
-        );
+    event CredentialAnchored(bytes32 indexed vcHash, address indexed issuer, uint256 timestamp);
+    event CredentialRevoked(bytes32 indexed vcHash, address indexed issuer, uint256 timestamp);
 
-        error NotAuthorizedIssuer();
-        error AlreadyAnchored();
-        error NotAnchored();
-        error AlreadyRevoked();
+    error NotAuthorizedIssuer();
+    error AlreadyAnchored();
+    error NotAnchored();
+    error AlreadyRevoked();
+    error OnlyOriginalIssuer();
 
-        constructor(address issuerRegistryAddr){
-            require(issuerRegistryAddr != address(0) , "Issuer registry required");
-            issuerRegistry = IIsuerRegistry(issuerRegistryAddr);
-        }
-        modifier onlyIssuer(){
-            if(!idduerRegistry.isIssuer(msg.sender)) revert NotAuthoriziationIssuer();
-            _;
-        }
-      /**
-     * @notice Anchor a VC hash. One-time. Emits CredentialAnchored.
-     * @param vcHash Keccak-256 (or other) hash of the VC JSON (or normalized payload).
-     */
+    constructor(address issuerRegistryAddr) {
+        require(issuerRegistryAddr != address(0), "issuerRegistry required");
+        issuerRegistry = IIssuerRegistry(issuerRegistryAddr);
+    }
 
-fucntion anchorCredential(bytes32 vcHash) external onlyIssuer{
-    VCRecord storage rec = _vc[vcHash];
-    if (rec.issuedAt == 0) revert NotAnchored();
-    if (rec.revoked) revert AlreadyRevoked();
+    modifier onlyIssuer() {
+        if (!issuerRegistry.isIssuer(msg.sender)) revert NotAuthorizedIssuer();
+        _;
+    }
 
-    //policy option A (strict) : only original issuer can revoke
-    require(rec.issuer == msg.sender , "Only issuer who anchored can revoke ");
+    function anchorCredential(bytes32 vcHash) external onlyIssuer {
+        Credential storage rec = credentials[vcHash];
+        if (rec.issuedAt != 0) revert AlreadyAnchored();
+        rec.issuer = msg.sender;
+        rec.issuedAt = uint64(block.timestamp);
+        emit CredentialAnchored(vcHash, msg.sender, block.timestamp);
+    }
 
-    rec.revoked = true;
-    rec.revokedAt = uint64(block.timestamp);
+    function revokeCredential(bytes32 vcHash) external onlyIssuer {
+        Credential storage rec = credentials[vcHash];
+        if (rec.issuedAt == 0) revert NotAnchored();
+        if (rec.revoked) revert AlreadyRevoked();
+        if (rec.issuer != msg.sender) revert OnlyOriginalIssuer();
+        rec.revoked = true;
+        rec.revokedAt = uint64(block.timestamp);
+        emit CredentialRevoked(vcHash, msg.sender, block.timestamp);
+    }
 
-    emit CredentialRevoked(vcHash , msg.sender , block.timestamp);
-} 
- /**
-     * @notice Query revocation status.
-     */
+    function isRevoked(bytes32 vcHash) external view returns (bool) {
+        return credentials[vcHash].revoked;
+    }
 
-     function isRevoked(bytes32 vcHash) external view returns (bool){
-        return _vc[vcHash].revoked;
-     }
-    /**
-     * @notice Get full record for off-chain indexers.
-     */
-
-     function getRecord(bytes32 vcHash) external view returns(VCRecord memory){
-        return _vc[vcHash];
-     }
-     
- }
+    function getRecord(bytes32 vcHash) external view returns (address issuer, uint64 issuedAt, bool revoked, uint64 revokedAt) {
+        Credential memory rec = credentials[vcHash];
+        return (rec.issuer, rec.issuedAt, rec.revoked, rec.revokedAt);
+    }
+}
