@@ -14,8 +14,15 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  contract IssuerRegistry is AccessControl {
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
 
-    event IssuerAdded(address indexed issuer , address indexed admin);
-    event IssuerRemoved(address indexed issuer , address indexed admin);
+    event IssuerAdded(
+        address indexed issuer , 
+        address indexed admin
+        );
+
+    event IssuerRemoved(
+        address indexed issuer, 
+        address indexed admin
+        );
 
     constructor(address intialAdmin){
         requier(initialAdmin != address(0) , "initial admin required");
@@ -26,7 +33,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
         _revokeRole(ISSUER_ROLE , issuer);
         emit IssuerRemoved(issuer , msg.sender);
     }
-    
+
     function removeIssuer(address issuer ) external onlyRole(DEFAULT_ADMIN_ROLE){
         _revokeRole(ISSUER_ROLE , issuer);
         emit IssuerRemoved(issuer , msg.sender);
