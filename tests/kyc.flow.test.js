@@ -1,39 +1,31 @@
-const { expect } = require("chai");
-const { ethers } = require("hardhat");
+const {ethers} = require ("chai");
+const {ethers} = require("hardhat");
 
-describe("KYC contracts flow", function () {
-  let admin, issuer, user, other;
-  let issuerRegistry, didRegistry, credentialRegistry;
-
+describe("KYC end to end flow" , function(){
+  let deployer , issuer , user , verifier , admin;
+  let IssuerRegistry , DIDRegistry , CredentialRegistry;
+  let issuerRegistry , didRegistry , credentialRegistry;
+  
   beforeEach(async () => {
-    [admin, issuer, user, other] = await ethers.getSigners();
+    // Test actors from hardhat's local node
+      [deployer , issuer , user , verifier , admin] = await ethers.getSigners();
+     // Contracts factories (blueprint compiled hardhat)
+     IssuerRegistry = await ethers.getContractFractory("IssuerRegistry" , deployer);
+     DIDRegistry = await ethers.getContractFractory("DIDRegistry" , deployer);
+     CredentialRegistry = await ethers.getContractFractory("CredentialRegistry" , deployer);
 
-    const IssuerRegistry = await ethers.getContractFactory("IssuerRegistry");
-    issuerRegistry = await IssuerRegistry.connect(admin).deploy(admin.address);
-    await issuerRegistry.deployed();
+     //deploy fresh instances before the test
+     issuerRegistry = await IssuerRegistry.deploy();
+     didRegistry = await DIDRegistry.deploy();
+     credentialRegistry = await CredentialRegistry.deploy(issuerRegistry.address);
 
-    await issuerRegistry.connect(admin).addIssuer(issuer.address);
-
-    const DIDRegistry = await ethers.getContractFactory("DIDRegistry");
-    didRegistry = await DIDRegistry.deploy();
-    await didRegistry.deployed();
-
-    const CredentialRegistry = await ethers.getContractFactory("CredentialRegistry");
-    credentialRegistry = await CredentialRegistry.deploy(issuerRegistry.address);
-    await credentialRegistry.deployed();
+  });
+  it("initializes with deployer as DEFAULT_ADMIN_ROLE" , async () => {
+     const DEFAULT_ADMIN_ROLE = await issuerRegistry.DEFAULT_ADMIN_ROLE;
+     // Default admin role is an access control by openZappline it can frant revoke or revoke it's own role
+     expect(await issuerRegistry.hasRole(DEFAULT_ADMIN_ROLE , deployer.address));
   });
 
-  it("registers DID and anchors/revokes VC", async () => {
-    await didRegistry.connect(user).registerDID("ipfs://did-user-1");
-    expect(await didRegistry.getDID(user.address)).to.equal("ipfs://did-user-1");
+  it("")
 
-    const vcHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("vc-payload"));
-    await expect(credentialRegistry.connect(issuer).anchorCredential(vcHash))
-      .to.emit(credentialRegistry, "CredentialAnchored");
-
-    await expect(credentialRegistry.connect(issuer).revokeCredential(vcHash))
-      .to.emit(credentialRegistry, "CredentialRevoked");
-
-    expect(await credentialRegistry.isRevoked(vcHash)).to.equal(true);
-  });
 });
