@@ -1,8 +1,8 @@
 import DIDModels from "../models/DID.models";
 import audit_logsModels from "../models/audit_logs.models";
-import {uploadJsonToPinata} from "../middleware/ipfs.middleware";
+import {uploadJsonToPinata} from "../../middleware/ipfs.middleware";
 import userModels from "../models/user.models.js";
-import ApiError from '../utility/ApiError';
+import ApiError from '../../utility/ApiError';
 import ApiResponse from "../utils/ApiResponse.js";
 
 const registerDID=async(req,res,next)=>{

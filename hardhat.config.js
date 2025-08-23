@@ -9,7 +9,7 @@ module.exports = {
   networks: {
     hardhat: {},
     sepolia: {
-      url: process.env.SEPOLIA_RPC_URL || "",
+      url: process.env.SEPOLIA_RPC_URL || "",//let's you talk your hardhat project with the blockchain
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     },
     polygon: {
