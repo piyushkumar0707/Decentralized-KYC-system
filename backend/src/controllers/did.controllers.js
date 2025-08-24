@@ -1,14 +1,9 @@
 import DIDModels from "../models/DID.models";
 import audit_logsModels from "../models/audit_logs.models";
-<<<<<<< HEAD:backend/controllers/did.controllers.js
 import {uploadJsonToPinata} from "../middleware/ipfs.middleware";
 import ApiError from '../utility/ApiError';
-=======
-import {uploadJsonToPinata} from "../../middleware/ipfs.middleware";
-import userModels from "../models/user.models.js";
-import ApiError from '../../utility/ApiError';
->>>>>>> 08ed16972877e1fb4cb76d76b40ebcba81325b16:backend/src/controllers/did.controllers.js
 import ApiResponse from "../utils/ApiResponse.js";
+import User from "../models/User.js";
 
 const registerDID=async(req,res,next)=>{
   try {
@@ -19,7 +14,7 @@ const registerDID=async(req,res,next)=>{
     }
 
     const cid=await uploadJsonToPinata(didDocument,`did-${did}`);
-    const res=await DIDModels.create({
+    const rec=await DIDModels.create({
         user:req.user.id,
         did,
         didDocumentCID:cid
@@ -38,7 +33,7 @@ const registerDID=async(req,res,next)=>{
 
 const getUser=async (req,res,next)=>{
 try {
-    const res=await DIDModels.findOne({user:req.user.id});
+    const rec=await DIDModels.findOne({user:req.user.id});
     return new ApiResponse(200,{res});
 } catch (error) {
     next(error);

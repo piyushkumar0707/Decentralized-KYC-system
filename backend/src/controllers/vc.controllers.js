@@ -1,10 +1,11 @@
 import VCMetadata from "../models/VCMetadata.js";
 import AuditLog from "../models/AuditLog.js";
-import { canonicalize, sha256hex } from "../utils/cryptoUtils.js";
+import hash from "../utils/hash.js";
 import { uploadJSONToIPFS } from "../services/ipfsService.js";
-import { credentialRegistry } from "../config/web3.js";
+import { credentialRegistry } from "../Services/encryptionService.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
+import { recordVC ,verifyVCSignature,revokeVC as revokeVCService} from "../Services/vc.services.js";
 
 export async function issueVC(req, res) {
   const { vc, issuerDID, subjectDID } = req.body;
@@ -13,10 +14,7 @@ export async function issueVC(req, res) {
     throw new ApiError(400, "vc, issuerDID, and subjectDID are required");
   }
 
-  // Canonize & hash
-  const canonicalVC = canonicalize(vc);
-  const vchash = sha256hex(canonicalVC);
-
+  const vchash = hash(vc);
   // Anchor VC on blockchain
   let txhash;
   try {
@@ -36,7 +34,7 @@ export async function issueVC(req, res) {
   }
 
   // Record in database
-  const record = await VCMetadata.create({
+  const record = await recordVC({
     issuedTo: subjectDID,
     vchash,
     ipfs_cid: cid,
@@ -65,16 +63,18 @@ export async function verifyVC(req, res) {
     throw new ApiError(400, "vchash query parameter is required");
   }
 
+
   const record = await VCMetadata.findOne({ vchash });
   if (!record) {
     return res.json(new ApiResponse(res, 404, "VC not found", { verified: false }));
   }
 
-  // Optionally: fetch record from chain for revocation status
-  const onChain = await credentialRegistry.getRecord(vchash);
-
-  const verified = !record.revoked && !onChain[2]; // onChain[2] is revoked flag
-
+  const isValid = await verifyVCSignature(record, process.env.RSA_PUBLIC_KEY);
+  if (!isValid) {
+    return res.json(new ApiResponse(res, 403, "VC signature verification failed", { verified: false }));
+  }
+  const verified = !record.revoked;
+  
   return new ApiResponse(res, 200, "VC Verification Status", {
     verified,
     anchored: record.anchored,
@@ -98,14 +98,13 @@ export async function revokeVC(req, res) {
     throw new ApiError(400, "VC is already revoked");
   }
 
-  let txhash;
-  try {
-    const tx = await credentialRegistry.revokeCredential(vchash);
-    const receipt = await tx.wait();
-    txhash = receipt.transactionHash;
-  } catch (err) {
-    throw new ApiError(500, "Failed to revoke VC on blockchain: " + err.message);
+  const onChain = await credentialRegistry.getRecord(vchash);
+  const verified = !record.revoked && !onChain[2];
+  if (!verified) {
+    throw new ApiError(403, "VC is revoked on-chain");
   }
+
+  const txhash = await revokeVCService(vchash, req.user._id);
 
   record.revoked = true;
   record.revokedAt = new Date();
