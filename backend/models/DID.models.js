@@ -6,9 +6,12 @@ const didSchema=new mongoose.Schema({
         required:true,
         unique:true
     },
-    method:String,
+    createdBy:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User"
+    },
     didDocumentCID:{
-        type:String,
+        type:String,   //IPFS CID OF DID DOCUMENT
         required:true
     },
     didDocument:Object,

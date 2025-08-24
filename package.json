@@ -11,7 +11,16 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@openzeppelin/contracts": "^5.0.1",
-    "hardhat": "^2.22.5",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.6.1",
+    "hardhat": "^2.22.5"
+  },
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "crypto-js": "^4.2.0",
+    "ether": "^0.0.9",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.1",
+    "winston": "^3.17.0"
   }
 }

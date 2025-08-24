@@ -6,16 +6,19 @@ const userSchema = new mongoose.Schema(
   {
     username: {
       type: String,
-      required: true,
+      lowercase: true,
+      unique: true,
+      sparse: true,
+      index: true
     },
     email: {
       type: String,
       unique: true,
-      required: true,
+      lowercase: true,
     },
     password: {
       type: String,
-      required: true,
+      
       
     },
     role: {
@@ -27,9 +30,21 @@ const userSchema = new mongoose.Schema(
       type: String,
     },
     did: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "DID"
     },
-    didDocumentCID: String, //IPFS CID OF DID DOCUMENT
+    wallet:{
+      type:String,
+      unique:true,
+      lowercase:true,
+      sparse:true,
+      index:true
+    },
+    nonce:{
+      type:String,
+    }
+    // ,
+    // didDocumentCID: String, //IPFS CID OF DID DOCUMENT
   },
   {
     timestamps: true,

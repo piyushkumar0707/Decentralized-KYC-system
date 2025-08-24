@@ -1,10 +1,9 @@
 import  dotenv from "dotenv";
 import app from './app.js'
-import connectDB from './db/index.js';
-
+import connectDB from './config/db.js'
 dotenv.config();
 
-connectDB.then(
+connectDB().then(
     ()=>{
         app.on('error',(error)=>{
             console.error("Error in express server: ",error);
