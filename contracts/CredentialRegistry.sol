@@ -21,8 +21,17 @@ contract CredentialRegistry {
 
     mapping(bytes32 => Credential) private credentials;
 
-    event CredentialAnchored(bytes32 indexed vcHash, address indexed issuer, uint256 timestamp);
-    event CredentialRevoked(bytes32 indexed vcHash, address indexed issuer, uint256 timestamp);
+    event CredentialAnchored(
+        bytes32 indexed vcHash, 
+        address indexed issuer, 
+        uint256 timestamp
+        );
+
+    event CredentialRevoked(
+        bytes32 indexed vcHash, 
+        address indexed issuer, 
+        uint256 timestamp
+        );
 
     error NotAuthorizedIssuer();
     error AlreadyAnchored();
@@ -30,7 +39,7 @@ contract CredentialRegistry {
     error AlreadyRevoked();
     error OnlyOriginalIssuer();
 
-    constructor(address issuerRegistryAddr) {
+    constructor(address issuerRegistryAddr){
         require(issuerRegistryAddr != address(0), "issuerRegistry required");
         issuerRegistry = IIssuerRegistry(issuerRegistryAddr);
     }
