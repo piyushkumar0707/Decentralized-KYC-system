@@ -1,6 +1,6 @@
-const hre = require("hardhat");
-const path = require("path");
-const fs = require("fs");
+import hre from ("hardhat");
+import path from ("path");
+import fs from ("fs");
 
 async function main() {
   const [deployer] = await hre.ethers.getSigners();// getting the metamask account of deployers here or ethereum account

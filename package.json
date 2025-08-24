@@ -2,6 +2,7 @@
   "name": "decentralized-kyc",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",

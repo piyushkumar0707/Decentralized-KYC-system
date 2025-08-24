@@ -24,14 +24,14 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
         address indexed admin
         );
 
-    constructor(address intialAdmin){
-        requier(initialAdmin != address(0) , "initial admin required");
+    constructor(address initialAdmin){
+        require(initialAdmin != address(0) , "initial admin required");
         _grantRole(DEFAULT_ADMIN_ROLE , initialAdmin);
     }
 
     function addIssuer(address issuer) external onlyRole(DEFAULT_ADMIN_ROLE){
-        _revokeRole(ISSUER_ROLE , issuer);
-        emit IssuerRemoved(issuer , msg.sender);
+        _grantRole(ISSUER_ROLE , issuer);
+        emit IssuerAdded(issuer , msg.sender);
     }
 
     function removeIssuer(address issuer ) external onlyRole(DEFAULT_ADMIN_ROLE){
