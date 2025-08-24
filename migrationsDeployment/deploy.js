@@ -30,7 +30,26 @@ async function main() {
     credentialRegistry: credentialRegistry.address
   }, null, 2));
 }
+// For actual frontend/backend interaction contracrt jason is required to combin the adress and ABI to tell how that contract will work
+ const contract = {
+  issuerRegistry : {
+    address : issuerRegistry.address,
+    abi : JSON.parse(IssuerRegistry.interface.formatJson())
+  },
+  didRegistry : {
+    address : didRegistry.address,
+    abi : JSON.parse(DIDRegistry.interface.formatJson())
+  },
+  credentialRegistry : {
+    address : credentialRegistry.address,
+    abi : JSON.parse(CredentialRegistry.interface.formatJson())
+  },
+ };
+ // saving the contract.json to backend and frontend
+ const backendPath = path.join(__dirname , "../backend/src/config/contract.json");
+ const frontend = path.join(__dirname , "../frontend/src/config/contract.json");
 
+ 
 main().catch((err) => { // this is for the error , if any error then this msg will be printed
   console.error(err);
   process.exitCode = 1;
