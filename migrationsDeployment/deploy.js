@@ -1,4 +1,6 @@
 const hre = require("hardhat");
+const path = require("path");
+const fs = require("fs");
 
 async function main() {
   const [deployer] = await hre.ethers.getSigners();// getting the metamask account of deployers here or ethereum account
@@ -29,7 +31,7 @@ async function main() {
     didRegistry: didRegistry.address,
     credentialRegistry: credentialRegistry.address
   }, null, 2));
-}
+
 // For actual frontend/backend interaction contracrt jason is required to combin the adress and ABI to tell how that contract will work
  const contract = {
   issuerRegistry : {
@@ -47,9 +49,11 @@ async function main() {
  };
  // saving the contract.json to backend and frontend
  const backendPath = path.join(__dirname , "../backend/src/config/contract.json");
- const frontend = path.join(__dirname , "../frontend/src/config/contract.json");
-
+ const frontendPath = path.join(__dirname , "../frontend/src/config/contract.json");
  
+ fs.writeFileSync(backendPath , JSONS.stringfy(contracts , null ,2));
+ fs.writeFileSync(frontendPath ,JSON.stringfy(contracts , null , 2));
+}
 main().catch((err) => { // this is for the error , if any error then this msg will be printed
   console.error(err);
   process.exitCode = 1;
