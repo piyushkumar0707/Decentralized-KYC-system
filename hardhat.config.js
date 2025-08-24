@@ -1,9 +1,8 @@
-import "@nomicfoundation/hardhat-toolbox";
-import dotenv from "dotenv";
+require ("@nomicfoundation/hardhat-toolbox");
+require("dotenv").config();
 
-dotenv.config();
 
-export default  {
+module.exports =  {
   solidity: {
     version: "0.8.20",
     settings: { optimizer: { enabled: true, runs: 200 } }
