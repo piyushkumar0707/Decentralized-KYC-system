@@ -76,8 +76,8 @@
       ]
     },
     "/Users/shreyd04/Decentralized-KYC-system/contracts/DIDRegistry.sol": {
-      "lastModificationDate": 1756143560459,
-      "contentHash": "2c4769d8c9fd5581e068e6d9322566bb",
+      "lastModificationDate": 1756143734843,
+      "contentHash": "4c8b3ce73b8cc34ca7a3575563b76583",
       "sourceName": "contracts/DIDRegistry.sol",
       "solcConfig": {
         "version": "0.8.30",
@@ -105,7 +105,7 @@
       },
       "imports": [],
       "versionPragmas": [
-        "^0.8.30"
+        "^0.8.20"
       ],
       "artifacts": [
         "DIDRegistry",
