@@ -55,7 +55,7 @@ contract DIDRegistry{
       if(bytes(old).length == 0){
         emit DIDRegistered(user , _didURI);
       } else {
-        emit DIDUpdate(msg.sender , old , _didURI);
+        emit DIDUpdated(msg.sender , old , _didURI);
       }
   } 
 
