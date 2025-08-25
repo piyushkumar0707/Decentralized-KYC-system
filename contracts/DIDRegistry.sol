@@ -11,7 +11,11 @@ contract DIDRegistry{
    IssuerRegistry public issuerRegistry;
   
   //enum for issuer based revocation reasons
-  enum RevokeReason { Fraud , Expired , Regulatory}
+  enum RevokeReason { 
+    Fraud,
+    Expired,
+    Regulatory
+  }
 
 
   event DIDRegistered(
@@ -28,7 +32,7 @@ contract DIDRegistry{
   event DIDRevoked(
     address indexed owner , 
     string lastDidURI,
-    string by,
+    string revokedBy,
     string reason
   );
 
@@ -44,14 +48,14 @@ contract DIDRegistry{
  // user or issuer can register DID
 
   function registerDID(address user , string calldata _didURI)external{
-      require(bytes(didURI).length > 0, "DID URI required");
+      require(bytes(_didURI).length > 0, "DID URI required");
       string memory old = _didOf[user];
-      _didOf[msg.sender] = didURI;
+      _didOf[msg.sender] = _didURI; // assigning did to given user
 
       if(bytes(old).length == 0){
-        emit DIDRegistered(user , didURI);
+        emit DIDRegistered(user , _didURI);
       } else {
-        emit DIDUpdate(user , old , didURI);
+        emit DIDUpdate(msg.sender , old , _didURI);
       }
   } 
 
