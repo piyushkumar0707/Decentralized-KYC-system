@@ -79,7 +79,7 @@ const reviewKYC = async (req, res) => {
     const kycRequest = await KYCrequestsModels.findById(id);
     if (!kycRequest) throw new ApiError(404, "KYC request not found");
 
-    if (req.user.role !== "issuer") {
+    if (req.user.role !== "verifier") {
       throw new ApiError(403, "You are not authorized to review KYC requests");
     }
     if (!["approved", "rejected"].includes(status)) {

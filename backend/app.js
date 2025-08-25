@@ -91,6 +91,10 @@ app.post('/webhook', verifyWebhookMiddleware(WEBHOOK_TOKEN, SECRET, MAX_TIME_DIF
 });
 app.use(express.static("public"));
 
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
+
 app.use(cookieParser());
 
 export default app;

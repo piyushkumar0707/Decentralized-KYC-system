@@ -123,6 +123,8 @@ const refreshAccessToken = async (req, res) => {
 const walletNonce = async (req, res) => {
   const { address } = req.body;
   if (!address) throw new ApiError(400, "Wallet address is required");
+ const c= await isOnChainIssuer(address);
+ if(!c) throw new ApiError(403, "You are not authorized");
 
   let user = await User.findOne({ wallet: address.toLowerCase() });
   if (!user) {
@@ -138,17 +140,19 @@ const walletNonce = async (req, res) => {
 
 // Wallet Signature Verification
 const walletVerify = async (req, res) => {
-  const { address, signature } = req.body;
+  const { address, signature ,expectedRole} = req.body;
   if (!address || !signature) throw new ApiError(400, "Address and signature are required");
 
   const user = await User.findOne({ wallet: address.toLowerCase() });
-  if (!user) throw new ApiError(404, "User not found");
+  if (!user || !user.nonce) throw new ApiError(404, "User not found");
+
 
   const recoveredAddress = ethers.utils.verifyMessage(user.nonce, signature);
   if (recoveredAddress.toLowerCase() !== address.toLowerCase()) {
     throw new ApiError(401, "Invalid signature");
   }
 
+  
   if(expectedRole==='issuer'){
     const ok=await isOwner(user._id, req.user._id);
     if(!ok) throw new ApiError(403, "You are not authorized");

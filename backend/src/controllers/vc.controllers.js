@@ -2,7 +2,7 @@ import VCMetadata from "../models/VCMetadata.js";
 import AuditLog from "../models/AuditLog.js";
 import hash from "../utils/hash.js";
 import { uploadJSONToIPFS } from "../services/ipfsService.js";
-import { credentialRegistry } from "../Services/encryptionService.js";
+import { credentialRegistry,signJson } from "../Services/encryptionService.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { recordVC ,verifyVCSignature,revokeVC as revokeVCService} from "../Services/vc.services.js";
@@ -25,10 +25,13 @@ export async function issueVC(req, res) {
     throw new ApiError(500, "Failed to anchor VC on blockchain: " + err.message);
   }
 
+  //sign vc
+  const signature = await signJson(vc, process.env.RSA_PRIVATE_KEY);
+
   // Upload VC JSON to IPFS
   let cid;
   try {
-    cid = await uploadJSONToIPFS(vc, `vc-${vchash}`);
+    cid = await uploadJSONToIPFS(vc, signature, `vc-${vchash}`);
   } catch (err) {
     throw new ApiError(500, "Failed to upload VC to IPFS: " + err.message);
   }
@@ -40,7 +43,8 @@ export async function issueVC(req, res) {
     ipfs_cid: cid,
     issuer: issuerDID,
     anchored: true,
-    txhash
+    txhash,
+    signature
   });
 
   await AuditLog.create({
@@ -58,9 +62,12 @@ export async function issueVC(req, res) {
 }
 
 export async function verifyVC(req, res) {
-  const { vchash } = req.query;
+  const { vchash,vc, signature } = req.query;
   if (!vchash) {
     throw new ApiError(400, "vchash query parameter is required");
+  }
+if(!vc || !signature){
+    throw new ApiError(400, "vc and signature query parameter is required");
   }
 
 
@@ -68,13 +75,17 @@ export async function verifyVC(req, res) {
   if (!record) {
     return res.json(new ApiResponse(res, 404, "VC not found", { verified: false }));
   }
-
+  // Verify signature
   const isValid = await verifyVCSignature(record, process.env.RSA_PUBLIC_KEY);
   if (!isValid) {
     return res.json(new ApiResponse(res, 403, "VC signature verification failed", { verified: false }));
   }
-  const verified = !record.revoked;
-  
+  //onchain check
+  const onChain = await credentialRegistry.getRecord(vchash);
+  const verified = !record.revoked && !onChain[2];
+  if (!verified) {
+    return new ApiResponse(res, 403, "VC is revoked on-chain", { verified });
+  }
   return new ApiResponse(res, 200, "VC Verification Status", {
     verified,
     anchored: record.anchored,

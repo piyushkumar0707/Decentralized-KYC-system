@@ -40,6 +40,10 @@ const vcMetadataSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    signature: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,

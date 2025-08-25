@@ -21,7 +21,8 @@ export async function recordVC({vchash, cid, issuerDID, subjectDID, txhash}, act
         issuer: issuerDID,
         subject: subjectDID,
         txhash,
-        issuedAt: new Date()
+        issuedAt: new Date(),
+        signature
     });
 
     await AuditLog.create({
@@ -33,6 +34,7 @@ export async function recordVC({vchash, cid, issuerDID, subjectDID, txhash}, act
     return { vchash, cid, txhash };
 }
 
+// Verifies that the VC's cryptographic signature matches the issuer's public key.
 export async function verifyVCSignature(vc, issuerPublicKey) {
     const isValid = await verifySignature(vc, issuerPublicKey);
     return isValid;
@@ -40,7 +42,16 @@ export async function verifyVCSignature(vc, issuerPublicKey) {
 }
 
 export async function revokeVC(vchash, actorId) {
-    await VCMetadata.deleteOne({ vchash });
+    const vc = await VCMetadata.findOne({ vchash });
+    if (!vc) {
+        throw new Error("VC not found");
+    }
+
+    vc.revoked = true;
+    vc.revokedAt = new Date();
+    await vc.save();
+    
+ 
     await AuditLog.create({
         action: "VC_REVOKED",
         actor: actorId,

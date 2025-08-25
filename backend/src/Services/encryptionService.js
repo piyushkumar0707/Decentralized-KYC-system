@@ -61,7 +61,7 @@ const signJson = async (data) => {
         key: privateKey,
         padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
     });
-    return { json, signature };
+    return { json, signature: signature.toString('base64') };
 };
 const verifySignature = async (data, signature) => {
     const isVerified = crypto.verify(
@@ -71,7 +71,7 @@ const verifySignature = async (data, signature) => {
             key: publicKey,
             padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
         },
-        signature
+        Buffer.from(signature, 'base64')
     );
     return isVerified;
 };
