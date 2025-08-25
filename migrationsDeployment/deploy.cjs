@@ -32,7 +32,7 @@ async function main() {
     credentialRegistry: credentialRegistry.address
   }, null, 2));
 
-// For actual frontend/backend interaction contracrt jason is required to combin the adress and ABI to tell how that contract will work
+// For actual frontend/backend interaction contracrt jason is required to combine the adress and ABI to tell how that contract will work
  const contract = {
   issuerRegistry : {
     address : issuerRegistry.address,

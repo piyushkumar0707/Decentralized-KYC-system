@@ -1,9 +1,10 @@
-require("@nomicfoundation/hardhat-toolbox");
+require ("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
-module.exports = {
+
+module.exports =  {
   solidity: {
-    version: "0.8.20",
+    version: "0.8.30",
     settings: { optimizer: { enabled: true, runs: 200 } }
   },
   networks: {
