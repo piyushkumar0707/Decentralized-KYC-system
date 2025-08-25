@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.30;
+pragma solidity ^0.8.20;
 
 interface IssuerRegistry {
   function isIssuer(address account) external view returns(bool);
