@@ -75,7 +75,7 @@ contract DIDRegistry{
           reasonStr = "Fraud detected";
         }
         else if ( reason == RevokeReason.Expired){
-          reasonStr = " ID Expired';
+          reasonStr = "ID Expired";
         }
         else if ( reason == RevokeReason.Regulatory){
           reasonStr = "Regulatory request";
