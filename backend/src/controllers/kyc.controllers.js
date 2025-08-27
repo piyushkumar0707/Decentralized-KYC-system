@@ -11,6 +11,7 @@ import ApiResponse from '../utils/ApiResponse.js';
 const submitKYC = async (req, res) => {
   try {
     const { did, documentType } = req.body;
+    if (!did) throw new ApiError(400, "DID is required");
     if (!req.file) throw new ApiError(400, "File is required");
 
     const buffer = fs.readFileSync(req.file.path);

@@ -15,7 +15,8 @@ const kycSchema = new mongoose.Schema({
     required: true
   },
   did: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'DID',
     required: true,
     index: true  //user
   },

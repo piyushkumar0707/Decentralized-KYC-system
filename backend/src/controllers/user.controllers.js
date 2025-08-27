@@ -1,6 +1,6 @@
 import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import { User } from "../models/user.model.js";
+import  User  from "../models/user.model.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import jwt from 'jsonwebtoken';
 import audit_logsModels from "../models/audit_logs.models.js";
@@ -121,10 +121,6 @@ const refreshAccessToken = async (req, res) => {
 
 // Wallet Login
 const walletNonce = async (req, res) => {
-  const { address } = req.body;
-  if (!address) throw new ApiError(400, "Wallet address is required");
- const c= await isOnChainIssuer(address);
- if(!c) throw new ApiError(403, "You are not authorized");
 
   let user = await User.findOne({ wallet: address.toLowerCase() });
   if (!user) {
@@ -140,35 +136,54 @@ const walletNonce = async (req, res) => {
 
 // Wallet Signature Verification
 const walletVerify = async (req, res) => {
-  const { address, signature ,expectedRole} = req.body;
+  const { address, signature} = req.body;
+  
   if (!address || !signature) throw new ApiError(400, "Address and signature are required");
+
 
   const user = await User.findOne({ wallet: address.toLowerCase() });
   if (!user || !user.nonce) throw new ApiError(404, "User not found");
 
-
-  const recoveredAddress = ethers.utils.verifyMessage(user.nonce, signature);
-  if (recoveredAddress.toLowerCase() !== address.toLowerCase()) {
+  let recoveredAddress;
+  try {
+    recoveredAddress = ethers.utils.verifyMessage(user.nonce, signature);
+    if (recoveredAddress.toLowerCase() !== address.toLowerCase()) {
+      throw new ApiError(401, "Invalid signature");
+    }
+  } catch (error) {
     throw new ApiError(401, "Invalid signature");
   }
 
-  
-  if(expectedRole==='issuer'){
-    const ok=await isOwner(user._id, req.user._id);
-    if(!ok) throw new ApiError(403, "You are not authorized");
-    user.role='issuer';
+  try {
+    const isissuer=await isOnChainIssuer(address);
+    if(isissuer) user.role='issuer';
+  } catch (error) {
+    throw new ApiError(403, "You are not authorized");
   }
 
-  if(expectedRole==='verifier'){
-    const ok=await isOwner(user._id, req.user._id);
-    if(!ok) throw new ApiError(403, "You are not authorized");
-    user.role='verifier';
-  }
-
-  user.nonce=undefined;
+  const nonce = undefined;
+  user.nonce = nonce;
   await user.save();
+
   const { accessToken, refreshToken } = await generateAccessandRefreshtoken(user._id);
+  await audit_logsModels.create({
+    user: user._id,
+    action: "wallet_verify",
+    status: "success",
+    timestamp: new Date()
+  });
   return res.status(200).json(new ApiResponse(200, { address, accessToken, refreshToken }, "Wallet verified"));
+};
+// View Profile
+export const getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+    if (!user) throw new ApiError(404, "User not found");
+
+    return res.status(200).json(new ApiResponse(200, user, "User profile fetched"));
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ error: error.message });
+  }
 };
 
 export {
@@ -177,5 +192,6 @@ export {
   loginUser,
   logout,
   walletNonce,
-  walletVerify
+  walletVerify,
+  getUserProfile
 };
