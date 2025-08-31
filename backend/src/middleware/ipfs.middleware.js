@@ -1,6 +1,6 @@
 const { PinataSDK } = require("pinata")
 import streamifier from "streamifier";
-import ApiError from "../utility/ApiError";
+import ApiError from "../utility/ApiError.js";
 require("dotenv").config()
 import axios from 'axios'
 

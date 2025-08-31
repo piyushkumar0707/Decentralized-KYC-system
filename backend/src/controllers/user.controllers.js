@@ -1,12 +1,11 @@
-import ApiError from "../utils/ApiError.js";
-import asyncHandler from "../utils/asyncHandler.js";
-import  User  from "../models/user.model.js";
-import ApiResponse from "../utils/ApiResponse.js";
+import ApiError from "../utility/ApiError.js";
+import  User  from "../models/user.models.js";
+import ApiResponse from "../utility/ApiResponse.js";
 import jwt from 'jsonwebtoken';
 import audit_logsModels from "../models/audit_logs.models.js";
 import crypto from 'crypto';
 import { ethers } from "ethers";
-
+import { isOnChainIssuer } from "../Services/blockChain.services.js";
 
 const generateAccessandRefreshtoken = async (userId) => {
   try {
@@ -160,7 +159,7 @@ const walletVerify = async (req, res) => {
   } catch (error) {
     throw new ApiError(403, "You are not authorized");
   }
-
+  user.wallet = address.toLowerCase();
   const nonce = undefined;
   user.nonce = nonce;
   await user.save();
@@ -175,7 +174,7 @@ const walletVerify = async (req, res) => {
   return res.status(200).json(new ApiResponse(200, { address, accessToken, refreshToken }, "Wallet verified"));
 };
 // View Profile
-export const getUserProfile = async (req, res) => {
+const getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select("-password");
     if (!user) throw new ApiError(404, "User not found");

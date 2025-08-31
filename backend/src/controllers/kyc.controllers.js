@@ -4,9 +4,10 @@ import audit_logsModels from '../models/audit_logs.models.js';
 import { uploadFileBufferToPinata } from '../middleware/ipfs.middleware.js';
 import {keyID } from '../config/KMS.js';
 import { encryptionBuffer } from '../Services/encryptionService.js';
-import ApiError from '../utils/ApiError.js';
-import ApiResponse from '../utils/ApiResponse.js';
-
+import ApiError from '../utility/ApiError.js';
+import ApiResponse from '../utility/ApiResponse.js';
+import User from '../models/user.models.js';
+import {issueVC} from './vc.controllers.js';
 // Submit KYC
 const submitKYC = async (req, res) => {
   try {
@@ -24,7 +25,7 @@ const submitKYC = async (req, res) => {
 
     const kycRequest = await KYCrequestsModels.create({
       user: req.user.id,
-      did,
+      did: req.body.did,
       documentType,
       documentCID: ipfsHash,
       encryption: {
@@ -72,43 +73,97 @@ const list = async (req, res) => {
   }
 };
 
-// Review (Approve/Reject) KYC Requests
-const reviewKYC = async (req, res) => {
+// Get all KYC history for a given user (by DID)
+const getKycHistory = async (req, res) => {
   try {
-    const { id, status } = req.body;
+    const { did } = req.params; // DID will be passed in params
 
-    const kycRequest = await KYCrequestsModels.findById(id);
-    if (!kycRequest) throw new ApiError(404, "KYC request not found");
-
-    if (req.user.role !== "verifier") {
-      throw new ApiError(403, "You are not authorized to review KYC requests");
-    }
-    if (!["approved", "rejected"].includes(status)) {
-      throw new ApiError(400, "Invalid status");
+    // Find user by DID
+    const user = await User.findOne({ did });
+    if (!user) {
+      return res.status(404).json({ message: "User with this DID not found" });
     }
 
-      kycRequest.status = status;
-    await kycRequest.save();
+    // Find all KYC records for that DID
+    const kycRecords = await KYCrequestsModels.find({ did }).sort({ createdAt: -1 }); // latest first
 
-    await audit_logsModels.create({
-      action: "KYC_Request_Reviewed",
+    res.status(200).json({
+      message: "KYC history fetched successfully",
+      total: kycRecords.length,
+      history: kycRecords
+    });
+  } catch (error) {
+    console.error("Error fetching KYC history:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+const approveKYC = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { remarks } = req.body;
+
+      const kyc = await KYCrequestsModels.findById(id);
+    if (!kyc) throw new ApiError(404, "KYC request not found");
+
+    if (kyc.status === "approved") return res.status(200).json(new ApiResponse(200, { kyc }, "Already approved"));
+
+    // mark reviewed
+    kyc.status = "approved";
+    kyc.reviewedBy = req.user.id;
+    kyc.remarks = remarks;
+    await kyc.save();
+
+    await AuditLog.create({
+      action: "KYC_APPROVED",
       actor: req.user.id,
-      metadata: {
-        id,
-        status
-      }
+      metadata: { id, status: "approved" }
     });
 
-    return new ApiResponse(res, 200, "KYC request reviewed", { kycRequest });
+    const vc = await issueVC({ kyc, issuerUser: req.user });
+
+
+    return new ApiResponse(res, 200, "KYC approved", { kyc,vc });
   } catch (error) {
-    return res.status(500).json(new ApiResponse(500, null, "Internal Server Error", {
-      error: error.message
-    }));
+    return res.status(500).json(new ApiResponse(500, null, "Internal Server Error", { error: error.message }));
+  }
+};
+
+// Reject KYC
+const rejectKYC = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { remarks } = req.body;
+
+    if (req.user.role !== "issuer") throw new ApiError(403, "Only issuer can reject KYC");
+
+    const kyc = await KYCrequestsModels.findById(id);
+    if (!kyc) throw new ApiError(404, "KYC request not found");
+
+    if (kyc.status === "rejected") return res.status(200).json(new ApiResponse(200, { kyc }, "Already rejected"));
+
+    kyc.status = "rejected";
+    kyc.reviewedBy = req.user.id;
+    kyc.remarks = remarks;
+    await kyc.save();
+
+    await AuditLog.create({
+      action: "KYC_REJECTED",
+      actor: req.user.id,
+      metadata: { id, status: "rejected" }
+    });
+
+    return new ApiResponse(res, 200, "KYC rejected", { kyc });
+  } catch (error) {
+    return res.status(500).json(new ApiResponse(500, null, "Internal Server Error", { error: error.message }));
   }
 };
 
 export {
   submitKYC,
   list,
-  reviewKYC
+  getKycHistory,
+  approveKYC,
+  rejectKYC
 };

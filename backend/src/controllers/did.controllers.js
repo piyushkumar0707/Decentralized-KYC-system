@@ -1,9 +1,9 @@
-import DIDModels from "../models/DID.models";
-import audit_logsModels from "../models/audit_logs.models";
-import { uploadJsonToPinata } from "../middleware/ipfs.middleware";
-import ApiError from "../utility/ApiError";
-import ApiResponse from "../utils/ApiResponse.js";
-import User from "../models/User.js";
+import DIDModels from "../models/DID.models.js";
+import audit_logsModels from "../models/audit_logs.models.js";
+import { uploadJsonToPinata } from "../middleware/ipfs.middleware.js";
+import ApiError from "../utility/ApiError.js";
+import ApiResponse from "../utility/ApiResponse.js";
+import User from "../models/user.models.js";
 import {
   registerDIDOnChain,
   issuerRevokeDIDOnChain,

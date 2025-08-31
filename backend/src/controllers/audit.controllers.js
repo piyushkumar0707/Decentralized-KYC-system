@@ -1,5 +1,5 @@
-import audit_logsModels from "../models/audit_logs.models";
-import ApiError from "../utility/ApiError";
+import audit_logsModels from "../models/audit_logs.models.js";
+import ApiError from "../utility/ApiError.js";
 
 const list=async(req,res)=>{
     try {

@@ -6,6 +6,11 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import crypto from 'crypto';
+import audit from './src/routes/audit.routes.js';
+import user from './src/routes/user.routes.js';
+import did from './src/routes/did.routes.js';
+import kyc from './src/routes/kyc.routes.js';
+import vc from './src/routes/vc.routes.js';
 
 app.use(cors({
     origin:process.env.CORS_ORIGIN,
@@ -89,11 +94,19 @@ app.post('/webhook', verifyWebhookMiddleware(WEBHOOK_TOKEN, SECRET, MAX_TIME_DIF
     }
     res.status(200).send('Webhook received successfully');
 });
+
 app.use(express.static("public"));
 
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok' });
 });
+
+app.use('/api/audit',audit);
+
+app.use('/api/user', user);
+app.use('/api/did', did);
+app.use('/api/kyc', kyc);
+app.use('/api/vc', vc);
 
 app.use(cookieParser());
 

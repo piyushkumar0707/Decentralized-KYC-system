@@ -5,9 +5,9 @@
 // revoke vc
 
 
-import VCMetadata from "../models/VCMetadata.js";
-import AuditLog from "../models/AuditLog.js";
-import hash from "../utils/hash.js";
+import VCMetadata from "../models/VCmetadata.models.js";
+import AuditLog from "../models/audit_logs.models.js";
+import hash from "../Services/hash.js";
 import {verifySignature} from '../Services/encryptionService.js';
 
 export function computeHash(vc) {

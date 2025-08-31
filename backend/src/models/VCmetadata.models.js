@@ -1,24 +1,31 @@
 
 import mongoose from 'mongoose';
+import User from './user.models.js';
 
 const vcMetadataSchema = new mongoose.Schema(
   {
     issuedTo: {
-      type: String, // DID of the subject
+      type: mongoose.Schema.Types.ObjectId, // DID of the subject
       required: true,
+      ref: 'User'
     },
     vchash: {
       type: String,
       required: true,
       unique: true,
     },
+    kyc:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'KYCrequests'
+    },
     ipfs_cid: {
       type: String,
       required: true,
     },
     issuer: {
-      type: String, // DID of the issuer
+      type: mongoose.Schema.Types.ObjectId, // DID of the issuer
       required: true,
+      ref: 'User'
     },
     anchored: {
       type: Boolean,

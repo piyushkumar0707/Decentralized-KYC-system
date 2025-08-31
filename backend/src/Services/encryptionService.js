@@ -1,7 +1,7 @@
 //AES-256-GCM TO ENCRYPT FILE BUFFER
 import crypto from 'crypto'
 
-import { wrapAESkey,unwrapAESKey,keyID } from '../config/KMS'
+import { wrapAESkey,unwrapAESKey,keyID } from '../config/KMS.js'
 
 import { readFileSync } from 'fs';
 

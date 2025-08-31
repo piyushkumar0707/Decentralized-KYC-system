@@ -1,8 +1,8 @@
-import { ethers } from "ethers";
+import { ethers ,JsonRpcProvider} from "ethers";
 import fs from "fs";
 import path from "path";
 
-const provider = new ethers.providers.JsonRpcProvider(process.env.BLOCKCHAIN_RPC_URL);
+const provider = new JsonRpcProvider(process.env.BLOCKCHAIN_RPC_URL);
 export const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 
 function load(name){
@@ -42,6 +42,20 @@ export async function revokeCredentialOnChain(vcHash){
 }
 export async function isOnChainIssuer(address){
   return await IssuerRegistry.isIssuer(address);
+}
+export async function getRecord(vcHash) {
+  const record = await CredentialRegistry.getRecord(vcHash);
+  return {
+    issuer: record[0],
+    issuedAt: Number(record[1]),
+    revoked: record[2],
+    revokedAt: Number(record[3]),
+  };
+}
+
+// Check if revoked
+export async function isVCRevoked(vcHash) {
+  return await CredentialRegistry.isRevoked(vcHash);
 }
 
 export async function getDIDOnChain(userAddress){

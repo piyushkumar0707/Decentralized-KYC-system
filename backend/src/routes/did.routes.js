@@ -1,11 +1,11 @@
 import express from "express";
-import { registerDID,revoke,getUser } from "../controllers/did.controllers";
+import { registerDID,revoke,getUser } from "../controllers/did.controllers.js";
 const router = express.Router();
-import auth from "../middlewares/auth.middleware.js";
-import role from "../middlewares/role.middleware.js";
+import {verifyJWT} from "../middleware/auth.middleware.js";
+import {authorizeRoles} from "../middleware/premission.middleware.js";
 
-router.post("/register", auth, role("issuer"), registerDID);
-router.post("/revoke", auth, role("issuer"), revoke);
-router.get("/user", auth, getUser);
+router.post("/register", verifyJWT, authorizeRoles("issuer"), registerDID);
+router.post("/revoke", verifyJWT, authorizeRoles("issuer"), revoke);
+router.get("/user", verifyJWT, getUser);
 
 export default router;

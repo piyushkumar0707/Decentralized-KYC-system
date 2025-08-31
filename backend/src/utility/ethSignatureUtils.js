@@ -27,7 +27,7 @@ export async function signDID(didURI){
     };
 }
 
-export function verifyDID(didURI, signture){
+export function verifyDID(didURI, signature){
     const message = `Registry DID: ${didURI}`;
     return ethers.verifyMessage(message, signature); // returns signer address
 }
