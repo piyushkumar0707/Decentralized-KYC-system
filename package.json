@@ -2,7 +2,6 @@
   "name": "decentralized-kyc",
   "version": "1.0.0",
   "private": true,
-  
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
@@ -16,6 +15,7 @@
     "hardhat": "^2.22.5"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "body-parser": "^2.2.0",
     "canonicalize": "^2.1.0",
     "crypto-js": "^4.2.0",
