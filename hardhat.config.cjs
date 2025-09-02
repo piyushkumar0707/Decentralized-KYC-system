@@ -9,7 +9,7 @@ module.exports = {
   networks: {
     hardhat: {},
     polygon: {
-      url: process.env.POLYGON_RPC_URL || "",
+      url: process.env.RPC_URL || "",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     }
   }
