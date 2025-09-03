@@ -10,8 +10,8 @@ async function main() {
   const IssuerRegistry = await hre.ethers.getContractFactory("contracts/IssuerRegistery.sol:IssuerRegistry");
   const issuerRegistry = await IssuerRegistry.deploy(deployer.address); // initial admin
 
-  await issuerRegistry.waitForDeployment();
-  const address = await issuerRegistry.getAddress();
+  await issuerRegistry.deployed();
+  const address = await issuerRegistry.address();
 
   console.log("✅ IssuerRegistry deployed at:", address);
 

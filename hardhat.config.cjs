@@ -1,6 +1,6 @@
-require("@nomicfoundation/hardhat-toolbox");
+require("@nomiclabs/hardhat-ethers");
 require("dotenv").config();
-
+const { PRIVATE_KEY, POLYGON_RPC } = process.env;
 module.exports = {
   solidity: {
     version: "0.8.30",
