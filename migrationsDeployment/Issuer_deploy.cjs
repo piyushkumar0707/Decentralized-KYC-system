@@ -7,7 +7,7 @@ async function main() {
   console.log("Deploying IssuerRegistry with account:", deployer.address);
   console.log("Deployer balance:", (await deployer.provider.getBalance(deployer.address)).toString());
 
-  const IssuerRegistry = await hre.ethers.getContractFactory("contracts/IssuerRegistery.sol:IssuerRegistry");
+  const IssuerRegistry = await hre.ethers.getContractFactory("contracts/IssuerRegistry.sol:IssuerRegistry");
   const issuerRegistry = await IssuerRegistry.deploy(deployer.address); // initial admin
 
   await issuerRegistry.deployed();

@@ -19,9 +19,7 @@ async function main() {
   console.log("Using IssuerRegistry at:", issuerRegistryAddress);
 
   // Load DIDRegistry contract
-  const DIDRegistry = await hre.ethers.getContractFactory(
-    "contracts/DIDRegistry.sol:DIDRegistry"
-  );
+  const DIDRegistry = await hre.ethers.getContractFactory("DIDRegistry");
 
   // Deploy with IssuerRegistry address
   const didRegistry = await DIDRegistry.deploy(issuerRegistryAddress);

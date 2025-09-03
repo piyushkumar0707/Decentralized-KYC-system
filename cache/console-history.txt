@@ -1,0 +1,3 @@
+npx hardhat run migrationsDeployment/Issuer_deploy.cjs --network polygon
+(await ethers.provider.getBalance("0x7E21e55e7b650E5415Ec1529063D23533Ceae824")).toString()
+(await ethers.provider.getBalance("YOUR_DEPLOYER_ADDRESS")).toString()

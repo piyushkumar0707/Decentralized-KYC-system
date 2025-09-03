@@ -112,44 +112,6 @@
         "IssuerRegistry"
       ]
     },
-    "/Users/shreyd04/Decentralized-KYC-system/contracts/IssuerRegistery.sol": {
-      "lastModificationDate": 1756056053274,
-      "contentHash": "823becc58ef5378cf2480000b8b4376c",
-      "sourceName": "contracts/IssuerRegistery.sol",
-      "solcConfig": {
-        "version": "0.8.30",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/access/AccessControl.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "IssuerRegistry"
-      ]
-    },
     "/Users/shreyd04/Decentralized-KYC-system/node_modules/@openzeppelin/contracts/access/AccessControl.sol": {
       "lastModificationDate": 1756137418203,
       "contentHash": "d0e2c05f09a3aea7cd299bbd4a435ee2",
@@ -334,6 +296,44 @@
       ],
       "artifacts": [
         "IERC165"
+      ]
+    },
+    "/Users/shreyd04/Decentralized-KYC-system/contracts/IssuerRegistry.sol": {
+      "lastModificationDate": 1756876789299,
+      "contentHash": "823becc58ef5378cf2480000b8b4376c",
+      "sourceName": "contracts/IssuerRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.30",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/AccessControl.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IssuerRegistry"
       ]
     }
   }
