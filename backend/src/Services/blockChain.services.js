@@ -1,15 +1,24 @@
 import { ethers ,JsonRpcProvider} from "ethers";
 import fs from "fs";
 import path from "path";
+import dotenv from "dotenv";
+dotenv.config();
+
 
 const provider = new JsonRpcProvider(process.env.BLOCKCHAIN_RPC_URL);
 export const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 
-function load(name){
-  const p = path.join(process.cwd(),"artifacts", `${name}.json`);
-  if(!fs.existsSync(p)) throw new Error("File not found: " + p);
-  return JSON.parse(fs.readFileSync(p));
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+function load(name) {
+  const p = path.join(__dirname, `../../../artifacts/contracts/${name}.sol`, `${name}.json`);
+  if (!fs.existsSync(p)) throw new Error("File not found: " + p);
+  return JSON.parse(fs.readFileSync(p, "utf-8"));
 }
+
 
 const DID = load("DIDRegistry");
 const Issuer = load("IssuerRegistry");
