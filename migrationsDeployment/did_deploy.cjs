@@ -11,12 +11,16 @@ async function main() {
   const deploymentsFile = path.join(__dirname, "deployments.json");
   const deployments = JSON.parse(fs.readFileSync(deploymentsFile, "utf8"));
   const issuerRegistryAddress = deployments.IssuerRegistry;
-
+  if (!issuerRegistryAddress || !issuerRegistryAddress.startsWith("0x")) {
+    throw new Error(
+      `❌ Invalid IssuerRegistry address in deployments.json: ${issuerRegistryAddress}`
+    );
+  }
   console.log("Using IssuerRegistry at:", issuerRegistryAddress);
 
   // Load DIDRegistry contract
   const DIDRegistry = await hre.ethers.getContractFactory(
-    "contracts/DIDRegistery.sol:DIDRegistry"
+    "contracts/DIDRegistry.sol:DIDRegistry"
   );
 
   // Deploy with IssuerRegistry address
