@@ -1,20 +1,15 @@
-require ("@nomicfoundation/hardhat-toolbox");
+require("@nomiclabs/hardhat-ethers");
 require("dotenv").config();
-
-
-module.exports =  {
+const { PRIVATE_KEY, POLYGON_RPC } = process.env;
+module.exports = {
   solidity: {
     version: "0.8.30",
     settings: { optimizer: { enabled: true, runs: 200 } }
   },
   networks: {
     hardhat: {},
-    sepolia: {
-      url: process.env.SEPOLIA_RPC_URL || "",//let's you talk your hardhat project with the blockchain
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
-    },
     polygon: {
-      url: process.env.POLYGON_RPC_URL || "",
+      url: process.env.RPC_URL || "",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     }
   }
