@@ -13,7 +13,7 @@ async function main() {
   await issuerRegistry.deployed();
   const address = await issuerRegistry.address();
 
-  console.log("✅ IssuerRegistry deployed at:", address);
+  console.log("✅ IssuerRegistry deployed at:", issuerRegistry.address);
 
   // Save address in a file
   const deploymentsFile = path.join(__dirname, "deployments.json");
