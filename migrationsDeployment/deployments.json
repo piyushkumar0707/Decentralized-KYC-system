@@ -1,4 +1,5 @@
 {
-  "IssuerRegistry": "0x7E23cF76b85B0B110Bc8934CDcD5f2e51558f3AF",
-  "DIDRegistry": "0x911BEfE17Acb0eAdF923924A75bf0faE137Fa08A"
+  "IssuerRegistry": "0x7E21e55e7b650E5415Ec1529063D23533Ceae824",
+  "DIDRegistry": "0x911BEfE17Acb0eAdF923924A75bf0faE137Fa08A",
+  "CredentialRegistry": "0x5Ae14d10F1FccbadEe63Fa131fdc452B9041f1d8"
 }
