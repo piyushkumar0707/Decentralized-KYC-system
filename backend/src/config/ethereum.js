@@ -1,5 +1,5 @@
 const {ethers} = require("ethers");
-const contracts = require("./contracts.jason"); // genrates by deploy script
+const contracts = require("./contracts.json"); // genrates by deploy script
 const path = require("path");
 const { isError } = require("util");
 require("dotenv").config();

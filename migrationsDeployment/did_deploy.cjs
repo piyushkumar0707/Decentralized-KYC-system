@@ -27,12 +27,21 @@ async function main() {
 
   console.log("✅ DIDRegistry deployed at:", didRegistry.address);
 
-  // Save DID address too
-  deployments.DIDRegistry = didRegistry.address;
-  fs.writeFileSync(deploymentsFile, JSON.stringify(deployments, null, 2));
-  console.log(`📂 Address saved in ${deploymentsFile}`);
+const artifactPath = path.join(__dirname, "../artifacts/contracts/DIDRegistry.sol/DIDRegistry.json");
+const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"));
+// Load old contracts.json if exists
+const contractsFile = path.join(__dirname, "contracts.json");
+let contracts = {};
+if (fs.existsSync(contractsFile)) {
+  contracts = JSON.parse(fs.readFileSync(contractsFile, "utf8"));
 }
-
+contracts.didRegistry = {
+  address: didRegistry.address,
+  abi: artifact.abi,
+};
+fs.writeFileSync(contractsFile, JSON.stringify(contracts, null, 2));
+  console.log(`📂 Address + ABI saved in ${contractsFile}`);
+}
 main().catch((error) => {
   console.error("❌ Deployment failed:", error);
   process.exitCode = 1;
