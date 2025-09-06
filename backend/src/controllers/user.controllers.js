@@ -4,14 +4,16 @@ import ApiResponse from "../utility/ApiResponse.js";
 import jwt from 'jsonwebtoken';
 import audit_logsModels from "../models/audit_logs.models.js";
 import crypto from 'crypto';
-import { ethers } from "ethers";
+import { ethers} from "ethers";
+import { verifyMessage } from "../utility/ethSignatureUtils.js";
+
 import { isOnChainIssuer } from "../Services/blockChain.services.js";
 
 const generateAccessandRefreshtoken = async (userId) => {
   try {
     const user = await User.findById(userId);
     const accessToken = user.generateAccessToken();
-    const refreshToken = generateRefreshToken();
+    const refreshToken = user.generateRefreshToken();
 
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
@@ -120,6 +122,9 @@ const refreshAccessToken = async (req, res) => {
 
 // Wallet Login
 const walletNonce = async (req, res) => {
+  const {address} = req.body;
+  if (!address) throw new ApiError(400, "Address is required");
+  if (!ethers.utils.isAddress(address)) throw new ApiError(400, "Invalid wallet address");
 
   let user = await User.findOne({ wallet: address.toLowerCase() });
   if (!user) {
@@ -145,33 +150,47 @@ const walletVerify = async (req, res) => {
 
   let recoveredAddress;
   try {
-    recoveredAddress = ethers.utils.verifyMessage(user.nonce, signature);
+    const recoveredAddress = verifyMessage(message, signature);
     if (recoveredAddress.toLowerCase() !== address.toLowerCase()) {
       throw new ApiError(401, "Invalid signature");
     }
   } catch (error) {
     throw new ApiError(401, "Invalid signature");
   }
+// if (address === "0x1234567890abcdef1234567890abcdef12345678") {
+//   return res.json({ success: true, role: "issuer (mock)" });
+// } else {
+//   return res.status(401).json({ success: false, message: "Not issuer" });
+// } only for testing
 
-  try {
+try {
     const isissuer=await isOnChainIssuer(address);
     if(isissuer) user.role='issuer';
   } catch (error) {
     throw new ApiError(403, "You are not authorized");
   }
   user.wallet = address.toLowerCase();
-  const nonce = undefined;
-  user.nonce = nonce;
+  user.nonce = undefined;
   await user.save();
 
-  const { accessToken, refreshToken } = await generateAccessandRefreshtoken(user._id);
-  await audit_logsModels.create({
+    const { accessToken, refreshToken } = await generateAccessandRefreshtoken(user._id);
+    const userSafe = await User.findById(user._id).select("-password -refreshToken");
+
+    const options = { httpOnly: true, secure: true };
+
+   await audit_logsModels.create({
     user: user._id,
     action: "wallet_verify",
     status: "success",
     timestamp: new Date()
   });
-  return res.status(200).json(new ApiResponse(200, { address, accessToken, refreshToken }, "Wallet verified"));
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json(new ApiResponse(200, { user: userSafe, role: user.role, accessToken, refreshToken ,address}, "Login successful"));
+
+
 };
 // View Profile
 const getUserProfile = async (req, res) => {

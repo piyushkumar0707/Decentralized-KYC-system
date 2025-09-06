@@ -18,6 +18,11 @@ export function getBrowserProvider() {
   }
   return new ethers.BrowserProvider(window.ethereum);
 }
+export function getIssuerSigner() {
+  const privateKey = process.env.ISSUER_PRIVATE_KEY; 
+  if (!privateKey) throw new Error("Missing ISSUER_PRIVATE_KEY in .env");
+  return new ethers.Wallet(privateKey, provider);
+}
 
 export async function getSigner(requestAccounts = false) {
   const provider = getBrowserProvider();

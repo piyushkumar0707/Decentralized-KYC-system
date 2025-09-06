@@ -6,8 +6,8 @@ const router = Router();
 
 
 router.post("/register", registerUser);
-router.get("/nonce", verifyJWT, walletNonce);
-router.post("/verify", verifyJWT, walletVerify);
+router.post("/nonce", walletNonce);
+router.post("/verify", walletVerify);
 router.post("/login", loginUser);
 router.post("/logout", logout);
 

@@ -1,8 +1,8 @@
 import{ethers} from "ethers";
-import { getSigner } from "../Services/ethereumServices";
+import { getSigner,getIssuerSigner } from "../Services/ethereumServices.js";
 
 export async function signMessage(message){
-    const signer = await getSigner(true);//fetches wallet signer(metamask)
+    const signer = getIssuerSigner(true);//fetches wallet signer(metamask)
     return await signer.signMessage(message);// a long hexadecimal string(digital signature)
 }
 
@@ -16,7 +16,7 @@ export function verifyMessage(message , signature){
 }
 
 export async function signDID(didURI){
-    const signer = await getSigner(true);//issuer's signer(wallet)
+    const signer = getIssuerSigner(true);//issuer's signer(wallet)
     const message = `Register DID:${didURI}`;
     const signature = await signer.signMessage(message);
 

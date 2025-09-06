@@ -21,7 +21,14 @@ const registerDID = async (req, res, next) => {
     if (existing)
       return res.json(new ApiResponse(200, existing, "DID already exists"));
 
-    const did = `did:ethr:${user._id.toString()}`; // Register on blockchain (using issuer’s wallet)
+    const issuerAddress = req.user.walletAddress;
+    if (!issuerAddress || !(await isOnChainIssuer(issuerAddress))) {
+      throw new ApiError(500, "Issuer not recognized on blockchain");
+    }
+    const did = `did:ethr:${issuerAddress.toLowerCase()}:${user._id.toString()}`;
+
+
+   
     const didDocument = {
       "@context": "https://www.w3.org/ns/did/v1",
       id: did,
@@ -53,7 +60,11 @@ const registerDID = async (req, res, next) => {
       did,
       metadata: { did, cid, userId: user._id },
     });
-    return new ApiResponse(200, { did, didAddress:user._id.toString() ,didDocumentCID: cid });
+return res.json(new ApiResponse(200, { 
+  did, 
+  didAddress: user._id.toString(), 
+  didDocumentCID: cid 
+}));
   } catch (error) {
     next(error);
   }
@@ -62,9 +73,12 @@ const registerDID = async (req, res, next) => {
 const getUser = async (req, res, next) => {
   try {
     const { userId } = req.query;
-    const id=userId || req.user.id;
-    const did = await getDIDOnChain(id);
+    const id=userId || req.user._id;
     const rec = await DIDModels.findOne({ user: id });
+    if (!rec) throw new ApiError(404, "DID not found");
+
+    const did = await getDIDOnChain(id);
+
     return new ApiResponse(200, { did, didAddress: id, ipfsCid: rec.didDocumentCID });
   } catch (error) {
     next(error);

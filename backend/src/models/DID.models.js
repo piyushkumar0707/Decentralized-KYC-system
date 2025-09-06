@@ -20,4 +20,5 @@ const didSchema=new mongoose.Schema({
 },{
     timestamps:true
 });
-export default DID=mongoose.model("DID",didSchema);
+const DID=mongoose.model("DID",didSchema);
+export default DID;
