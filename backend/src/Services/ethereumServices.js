@@ -7,7 +7,7 @@ so your frontend UI doesn’t directly handle low-level Web3/ethers.js stuff.
 */
 
 import { ethers } from "ethers";
-import contracts from "./contracts.json"; // auto-generated after deploy (contains abi + address)
+import contracts from "../../../migrationsDeployment/contracts.json" with { type: "json" };
 
 const EXPECTED_CHAIN_ID = 137; // Polygon Mainnet (change to 80001 for Mumbai testnet)
 
@@ -19,7 +19,7 @@ export function getBrowserProvider() {
   return new ethers.BrowserProvider(window.ethereum);
 }
 export function getIssuerSigner() {
-  const privateKey = process.env.ISSUER_PRIVATE_KEY; 
+  const privateKey = process.env.PRIVATE_KEY; 
   if (!privateKey) throw new Error("Missing ISSUER_PRIVATE_KEY in .env");
   return new ethers.Wallet(privateKey, provider);
 }

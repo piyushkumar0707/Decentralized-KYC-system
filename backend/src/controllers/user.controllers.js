@@ -147,15 +147,16 @@ const walletVerify = async (req, res) => {
 
   const user = await User.findOne({ wallet: address.toLowerCase() });
   if (!user || !user.nonce) throw new ApiError(404, "User not found");
-
+  console.log(user);
   let recoveredAddress;
   try {
-    const recoveredAddress = verifyMessage(message, signature);
+    recoveredAddress = verifyMessage(user.nonce, signature);
+
     if (recoveredAddress.toLowerCase() !== address.toLowerCase()) {
-      throw new ApiError(401, "Invalid signature");
+      throw new ApiError(401, "Invalid signature - address mismatch");
     }
   } catch (error) {
-    throw new ApiError(401, "Invalid signature");
+    throw new ApiError(401, "Invalid signature - verification failed");
   }
 // if (address === "0x1234567890abcdef1234567890abcdef12345678") {
 //   return res.json({ success: true, role: "issuer (mock)" });
