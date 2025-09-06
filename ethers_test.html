@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ethers Test</title>
+  <!-- Load ethers.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+</head>
+<body>
+  <h2>MetaMask Signature Test</h2>
+  <button id="sign">Sign Message</button>
+
+  <script>
+    document.getElementById("sign").onclick = async () => {
+      if (!window.ethereum) {
+        alert("MetaMask not found. Please install it.");
+        return;
+      }
+      try {
+        // Connect to provider
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+
+        // Get signer
+        const signer = await provider.getSigner();
+
+        // Replace this with your backend-provided nonce
+        const nonce = "123456";  
+
+        // Ask MetaMask to sign
+        const signature = await signer.signMessage(nonce);
+
+        console.log("Signature:", signature);
+        alert("Signature: " + signature);
+      } catch (err) {
+        console.error(err);
+        alert("Error: " + err.message);
+      }
+    };
+  </script>
+</body>
+</html>
+
