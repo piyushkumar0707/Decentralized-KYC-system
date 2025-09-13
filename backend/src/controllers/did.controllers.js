@@ -4,6 +4,7 @@ import { uploadJsonToPinata } from "../middleware/ipfs.middleware.js";
 import ApiError from "../utility/ApiError.js";
 import ApiResponse from "../utility/ApiResponse.js";
 import User from "../models/user.models.js";
+import { isOnChainIssuer } from "../Services/blockChain.services.js";
 import {
   registerDIDOnChain,
   issuerRevokeDIDOnChain,
@@ -21,7 +22,7 @@ const registerDID = async (req, res, next) => {
     if (existing)
       return res.json(new ApiResponse(200, existing, "DID already exists"));
 
-    const issuerAddress = req.user.walletAddress;
+    const issuerAddress = req.user.wallet;
     if (!issuerAddress || !(await isOnChainIssuer(issuerAddress))) {
       throw new ApiError(500, "Issuer not recognized on blockchain");
     }
@@ -79,8 +80,12 @@ const getUser = async (req, res, next) => {
 
     const did = await getDIDOnChain(id);
 
-    return new ApiResponse(200, { did, didAddress: id, ipfsCid: rec.didDocumentCID });
-  } catch (error) {
+  return res.json(new ApiResponse(200, {
+      did: rec.did,
+      didAddress: rec.didAddress,
+      ipfsCid: rec.didDocumentCID
+    }));
+    } catch (error) {
     next(error);
     throw new ApiError(400, "DID FAILED");
   }
@@ -100,6 +105,6 @@ const revoke=async(req,res,next)=>{
    did:rec.did,
    metadata:{did:rec.did,reason,userId:user._id}
  });
- return new ApiResponse(200,{txHash});
+  return res.json(new ApiResponse(200, { txHash }));
 }
 export { getUser, registerDID, revoke };

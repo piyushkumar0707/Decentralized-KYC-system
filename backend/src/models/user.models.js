@@ -30,10 +30,12 @@ const userSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
     },
-    did: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "DID"
-    },
+     did: {
+            type: String, // Corrected from ObjectId to String
+            default: null,
+            unique: true,
+            sparse: true, // Allows multiple null values
+        },
     wallet:{
       type:String,
       unique:true,

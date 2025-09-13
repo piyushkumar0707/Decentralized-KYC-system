@@ -9,11 +9,12 @@ import {
 } from "../controllers/kyc.controllers.js";
 import {verifyJWT} from "../middleware/auth.middleware.js";
 import {authorizeRoles} from "../middleware/premission.middleware.js";
+import { upload } from "../middleware/multer.js";
 
 const router = express.Router();
 
 // Submit KYC (by user)
-router.post("/submit", verifyJWT, submitKYC);
+router.post("/submit", verifyJWT, upload.single('file'),submitKYC);
 
 // List pending KYC requests (user sees their own, issuer sees all)
 router.get("/pending", verifyJWT, list);

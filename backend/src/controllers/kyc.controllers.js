@@ -15,7 +15,28 @@ const submitKYC = async (req, res) => {
     if (!did) throw new ApiError(400, "DID is required");
     if (!req.file) throw new ApiError(400, "File is required");
 
+
     const buffer = fs.readFileSync(req.file.path);
+
+    if (!buffer) throw new ApiError(500, "Failed to read uploaded file");
+    // Check if user already has a pending KYC
+    const existing = await KYCrequestsModels.findOne({
+      user: req.user.id,
+      status: 'pending'
+    });
+    if (existing) {
+      return res.status(400).json(new ApiResponse(400, null, "Pending KYC request already exists"));
+    }
+    // Check if user already has an approved KYC for the same document type
+    const approved = await KYCrequestsModels.findOne({
+      user: req.user.id,
+      documentType,
+      status: 'approved'
+    });
+    if (approved) {
+      return res.status(400).json(new ApiResponse(400, null, `KYC already approved for document type: ${documentType}`));
+    }
+
 
     // Encrypt and wrap AES key
     const { cipherText, meta } = await encryptionBuffer(buffer);
@@ -47,8 +68,10 @@ const submitKYC = async (req, res) => {
       }
     });
 
-    return new ApiResponse(res, 201, "KYC request submitted successfully", { kycRequest });
+    return res.json(new ApiResponse(201, "KYC request submitted successfully", { kycRequest }));
   } catch (error) {
+    console.error("Error submitting KYC:", error);
+
     return res.status(500).json(new ApiResponse(500, null, "Internal Server Error", {
       error: error.message
     }));
@@ -63,10 +86,11 @@ const list = async (req, res) => {
       status: "pending"
     });
 
-    return new ApiResponse(res, 200, "Pending KYC requests retrieved", {
+    return res.json(new ApiResponse( 200, "Pending KYC requests retrieved", {
       kycRequests
-    });
+    }));
   } catch (error) {
+    console.error("Error fetching pending KYC requests:", error);
     return res.status(500).json(new ApiResponse(500, null, "Internal Server Error", {
       error: error.message
     }));
@@ -87,11 +111,11 @@ const getKycHistory = async (req, res) => {
     // Find all KYC records for that DID
     const kycRecords = await KYCrequestsModels.find({ did }).sort({ createdAt: -1 }); // latest first
 
-    res.status(200).json({
-      message: "KYC history fetched successfully",
+    res.status(200).json(new ApiResponse(200, {
+         message: "KYC history fetched successfully",
       total: kycRecords.length,
       history: kycRecords
-    });
+    }));
   } catch (error) {
     console.error("Error fetching KYC history:", error);
     res.status(500).json({ message: "Server error" });
@@ -115,7 +139,7 @@ const approveKYC = async (req, res) => {
     kyc.remarks = remarks;
     await kyc.save();
 
-    await AuditLog.create({
+    await audit_logsModels.create({
       action: "KYC_APPROVED",
       actor: req.user.id,
       metadata: { id, status: "approved" }
@@ -124,7 +148,7 @@ const approveKYC = async (req, res) => {
     const vc = await issueVC({ kyc, issuerUser: req.user });
 
 
-    return new ApiResponse(res, 200, "KYC approved", { kyc,vc });
+    return res.json(new ApiResponse(200, "KYC approved", { kyc,vc }));
   } catch (error) {
     return res.status(500).json(new ApiResponse(500, null, "Internal Server Error", { error: error.message }));
   }
@@ -148,13 +172,13 @@ const rejectKYC = async (req, res) => {
     kyc.remarks = remarks;
     await kyc.save();
 
-    await AuditLog.create({
+    await audit_logsModels.create({
       action: "KYC_REJECTED",
       actor: req.user.id,
       metadata: { id, status: "rejected" }
     });
 
-    return new ApiResponse(res, 200, "KYC rejected", { kyc });
+    return res.json(new ApiResponse(res, 200, "KYC rejected", { kyc }));
   } catch (error) {
     return res.status(500).json(new ApiResponse(500, null, "Internal Server Error", { error: error.message }));
   }

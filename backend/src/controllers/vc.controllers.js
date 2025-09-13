@@ -2,7 +2,7 @@ import VCMetadata from "../models/VCmetadata.models.js";
 import AuditLog from "../models/audit_logs.models.js";
 import hash from "../Services/hash.js";
 import { uploadJsonToPinata } from "../middleware/ipfs.middleware.js";
-import { signJson, verifySignature } from "../Services/encryptionService.js";
+import { signJson } from "../Services/encryptionService.js";
 import ApiError from "../utility/ApiError.js";
 import ApiResponse from "../utility/ApiResponse.js";
 import { recordVC } from "../Services/vc.services.js";
@@ -35,7 +35,7 @@ export async function issueVC({ kyc, issuerUser }) {
   // Upload VC JSON + signature to IPFS
   let cid;
   try {
-    cid = await uploadJSONToIPFS({ vc, signature }, `vc-${vchash}`);
+    cid = await uploadJsonToPinata({ vc, signature }, `vc-${vchash}`);
   } catch (err) {
     throw new ApiError(500, "Failed to upload VC to IPFS: " + err.message);
   }

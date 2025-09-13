@@ -9,7 +9,7 @@ export async function signMessage(message) {
 // Verifying signature
 export function verifyMessage(message, signature) {
     try {
-        return ethers.verifyMessage(message, signature); // Returns the signer address
+        return ethers.utils.verifyMessage(message, signature); // Returns the signer address
     } catch (err) {
         throw new Error("Invalid signature");
     }
