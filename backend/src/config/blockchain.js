@@ -23,4 +23,8 @@ export function makeReadContract(nameOrObj){
     return new ethers.Contract(address,abi,provider);
 }
 
-export const issuerRegister
+export const issuerRegistry = makeReadContract("issuerRegistry");
+export const didRegistry = makeReadContract("didRegistry");
+export const credentialRegistry = makeReadContract("credentialRegistry");
+
+export default provider;

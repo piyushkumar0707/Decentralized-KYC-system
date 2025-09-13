@@ -1,5 +1,4 @@
 import ApiError from "../utility/ApiError.js";
-import ApiResponse from "../utility/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import User from "../models/user.models.js";
 

@@ -37,9 +37,13 @@ const uploadJsonToPinata = async (json, name = "json") => {
 };
 
 const fetchFromGateway = async (cid) => {
-  const url = `${process.env.PINATA_GATEWAY || "https://gateway.pinata.cloud/ipfs"}/${cid}`;
-  const res = await axios.get(url, { responseType: "arraybuffer" });
-  return Buffer.from(res.data);
+try {
+    const url = `${process.env.PINATA_GATEWAY || "https://gateway.pinata.cloud/ipfs"}/${cid}`;
+    const res = await axios.get(url, { responseType: "arraybuffer" });
+    return Buffer.from(res.data);
+} catch (error) {
+  throw new ApiError(404,"failed to fetch from IPFS");
+}
 };
 
 export { fetchFromGateway, uploadFileBufferToPinata, uploadJsonToPinata };
