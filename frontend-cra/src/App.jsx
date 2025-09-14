@@ -3,7 +3,7 @@ import { AuthService } from "./services/auth.js"
 import Navbar from "./components/Navbar"
 import Login from "./pages/Login"
 import IssuerDashboard from "./pages/IssuerDashboard"
-import UserDashboard from "./pages/UserDashboard"
+import UserDashboard from "./pages/UserDashBoard"
 import Profile from "./pages/Profile"
 
 // Protected Route Component
