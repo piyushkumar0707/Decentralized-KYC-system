@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AuthService } from "./services/auth.js"
 import Navbar from "./component/Navbar"
 import Login from "./pages/Login"
-import IssuerDashboard from "./pages/IssuerDashboard.jsx"
+import IssuerDashboard from "./pages/IssuerDashoard.jsx"
 import UserDashboard from "./pages/UserDashBoard.jsx"
 import Profile from "./pages/Profile"
 
