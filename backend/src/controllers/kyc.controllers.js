@@ -131,6 +131,7 @@ const approveKYC = async (req, res) => {
       const kyc = await KYCrequestsModels.findById(id);
     if (!kyc) throw new ApiError(404, "KYC request not found");
 
+        if (req.user.role !== "issuer") throw new ApiError(403, "Only issuer can approve KYC");
     if (kyc.status === "approved") return res.status(200).json(new ApiResponse(200, { kyc }, "Already approved"));
 
     // mark reviewed
