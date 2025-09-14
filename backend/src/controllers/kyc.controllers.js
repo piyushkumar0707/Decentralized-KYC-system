@@ -179,7 +179,7 @@ const rejectKYC = async (req, res) => {
       metadata: { id, status: "rejected" }
     });
 
-    return res.json(new ApiResponse(res, 200, "KYC rejected", { kyc }));
+    return res.json(new ApiResponse( 200, "KYC rejected", { kyc }));
   } catch (error) {
     return res.status(500).json(new ApiResponse(500, null, "Internal Server Error", { error: error.message }));
   }
