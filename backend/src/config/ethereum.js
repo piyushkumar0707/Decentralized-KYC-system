@@ -1,7 +1,5 @@
 const {ethers} = require("ethers");
 const contracts = require("./contracts.json"); // genrates by deploy script
-const path = require("path");
-const { isError } = require("util");
 require("dotenv").config();
 
 const RPC_URL = process.env.RPC_URL;
