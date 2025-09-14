@@ -6,7 +6,6 @@ import audit_logsModels from "../models/audit_logs.models.js";
 import crypto from 'crypto';
 import { ethers} from "ethers";
 import { verifyMessage } from "../utility/ethSignatureUtils.js";
-
 import { isOnChainIssuer } from "../Services/blockChain.services.js";
 
 const generateAccessandRefreshtoken = async (userId) => {
