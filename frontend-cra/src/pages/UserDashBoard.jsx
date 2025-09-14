@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { apiService } from "../services/api"
-import DIDManager from "../components/DIDManager.jsx"
-import PrivacyToggle from "../components/PrivacyToggle.jsx"
+import DIDManager from "../component/DIDManager.jsx"
+import PrivacyToggle from "../component/PrivacyToggle.jsx"
 
 const UserDashboard = () => {
   const [userId, setUserId] = useState("")
