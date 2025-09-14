@@ -1,30 +1,38 @@
-import {ethers} from "ethers";
-import contracts from "//migrationsDeployment/contracts.json" assert { type: "json" };
+import fs from "fs";
+import path from "path";
+import { ethers } from "ethers";
+import dotenv from "dotenv";
+dotenv.config();
+import { fileURLToPath } from "url";
 
-const RPC_URL=process.env.BLOCKCHAIN_RPC_URL;
-if(!RPC_URL) throw new Error("BLOCKCHAIN_RPC_URL not set in env");
-const provider=new ethers.JsonRpcProvider(RPC_URL);
+// Setup paths
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-function _resolve(nameOrObj){
-    if(typeof nameOrObj==="string"){
-   if(!contracts[nameOrObj]) throw Error(`contracts.json missing key: ${nameOrObj}`);
-    return contracts[nameOrObj];
-   
+// Load deployed contract data (ABI + address)
+const contractPath = path.resolve(__dirname, "../../../migrationsDeployment/contracts.json");
+const contracts = JSON.parse(fs.readFileSync(contractPath, "utf-8"));
+
+// Blockchain provider + signer
+const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
+const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+
+// Helper: load contract using ABI + address from contracts.json
+function loadContract(name) {
+  if (!contracts[name]) {
+    throw new Error(`Contract ${name} not found in contracts.json`);
+  }
+
+  return new ethers.Contract(
+    contracts[name].address,
+    contracts[name].abi,
+    wallet
+  );
 }
-if(!nameOrObj?.address || !nameOrObj.abi){
-    throw Error(`makeReadContract requires { address, abi }`);
 
-}
-return nameOrObj;
-}
+// Export ready-to-use instances
+export const DIDRegistry = loadContract("didRegistry");
+export const IssuerRegistry = loadContract("issuerRegistry");
+export const CredentialRegistry = loadContract("credentialRegistry");
 
-export function makeReadContract(nameOrObj){
-    const {address,abi}=_resolve(nameOrObj);
-    return new ethers.Contract(address,abi,provider);
-}
-
-export const issuerRegistry = makeReadContract("issuerRegistry");
-export const didRegistry = makeReadContract("didRegistry");
-export const credentialRegistry = makeReadContract("credentialRegistry");
-
-export default provider;
+export { provider, wallet };
