@@ -285,11 +285,25 @@ export async function isCredentialValidOnChain(credentialHash) {
 }
 
 export async function registerIssuerOnChain(issuerAddress, metadataURI) {
-  const tx = await IssuerRegistry.registerIssuer(issuerAddress, metadataURI);
+  const tx = await IssuerRegistry.addIssuer(issuerAddress, metadataURI);
   const receipt = await tx.wait();
   return receipt.transactionHash;
 }
 
-export async function isIssuerRegisteredOnChain(issuerAddress) {
+export async function isOnChainIssuer(issuerAddress) {
   return await IssuerRegistry.isRegistered(issuerAddress);
+}
+
+export async function getRecord(vcHash) {
+  const record = await CredentialRegistry.getRecord(vcHash);
+  return {
+    issuer: record[0],
+    issuedAt: Number(record[1]), // <- on-chain might be BigNumber
+    revoked: record[2],
+    revokedAt: Number(record[3]), // <- convert to number
+  };
+}
+
+export async function isVCRevoked(vcHash) {
+  return await CredentialRegistry.isRevoked(vcHash);
 }

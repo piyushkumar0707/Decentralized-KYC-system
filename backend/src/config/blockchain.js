@@ -35,4 +35,5 @@ export const DIDRegistry = loadContract("didRegistry");
 export const IssuerRegistry = loadContract("issuerRegistry");
 export const CredentialRegistry = loadContract("credentialRegistry");
 
+
 export { provider, wallet };

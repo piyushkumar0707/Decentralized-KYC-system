@@ -7,7 +7,7 @@ import User from "../models/user.models.js";
 import { isOnChainIssuer } from "../Services/blockChain.services.js";
 import {
   registerDIDOnChain,
-  issuerRevokeDIDOnChain,
+  revokeDIDOnChain as issuerRevokeDIDOnChain,
   getDIDOnChain,
 } from "../Services/blockChain.services.js";
 
@@ -98,7 +98,13 @@ const revoke=async(req,res,next)=>{
 
  const rec=await DIDModels.findOne({user:userId});
  if(!rec) throw new ApiError(404,"DID not found");
- const txHash=await issuerRevokeDIDOnChain(userId,reason);
+     const issuerAddress = req.user.wallet;
+    if (!issuerAddress || !(await isOnChainIssuer(issuerAddress))) {
+      throw new ApiError(403, "Caller not recognized as issuer");
+    }
+ const txHash=await issuerRevokeDIDOnChain(userId.toString());
+
+  await DIDModels.findByIdAndDelete(rec._id);
  await audit_logsModels.create({
    action:"DID_revoked",
    actor:req.user.id,
