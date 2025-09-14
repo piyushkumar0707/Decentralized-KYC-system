@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { AuthService } from "./services/auth.js"
-import Navbar from "./src/component/Navbar"
+import Navbar from "./component/Navbar"
 import Login from "./pages/Login"
-import IssuerDashboard from "./src/pages/IssuerDashBoard"
-import UserDashboard from "./src/pages/UserDashBoard"
+import IssuerDashboard from "./pages/IssuerDashBoard"
+import UserDashboard from "./pages/UserDashBoard"
 import Profile from "./pages/Profile"
 
 // Protected Route Component
