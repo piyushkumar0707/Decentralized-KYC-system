@@ -1,18 +1,20 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { AuthService } from "./services/auth.js"
-import Navbar from "./components/Navbar.jsx"
-import Login from "./pages/Login.jsx"
-import IssuerDashboard from "/pages/IssuerDashboard.jsx"
-import UserDashboard from "/pages/UserDashboard.jsx"
-import Profile from "./pages/Profile.jsx"
+import Navbar from "./components/Navbar"
+import Login from "./pages/Login"
+import IssuerDashboard from "./pages/IssuerDashboard"
+import UserDashboard from "./pages/UserDashboard"
+import Profile from "./pages/Profile"
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
+  console.log("[v0] Checking authentication:", AuthService.isAuthenticated())
   return AuthService.isAuthenticated() ? children : <Navigate to="/login" />
 }
 
 function App() {
+  console.log("[v0] App component rendering")
+
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
@@ -43,7 +45,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/" element={<Navigate to="/user" />} />
+          <Route path="/" element={<Navigate to="/login" />} />
         </Routes>
       </div>
     </Router>
@@ -51,3 +53,4 @@ function App() {
 }
 
 export default App
+
