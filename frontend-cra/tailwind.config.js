@@ -2,7 +2,7 @@
 module.exports = {
   content: [
     "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src//*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
@@ -50,4 +50,3 @@ module.exports = {
   },
   plugins: [require("tailwindcss-animate")],
 }
-
