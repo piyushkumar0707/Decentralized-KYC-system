@@ -1,9 +1,9 @@
 // frontend: metamask signer. USE FROM YOUR REACT/next.js app
 
-import {ethers} from ("ethers");
+import { ethers } from "ethers";
 import contracts from "../config/contract.json";
 
-export const EXPECTED_CHAIN_ID = 80002;
+export const EXPECTED_CHAIN_ID = 31337; // Hardhat local network
 
 export function getBrowserProvider(){//basically this function ensures that the metamsk is installed
     if(typeof window === "undefined"){
@@ -12,13 +12,13 @@ export function getBrowserProvider(){//basically this function ensures that the 
     if(!window.ethereum){
         throw Error("metamask account not found . Please install MetaMask.");
     }
-    return new ethers.BroserProvider(window.ethereum);//returns the browserProvider that talks to metamask
+    return new ethers.BrowserProvider(window.ethereum);//returns the browserProvider that talks to metamask
 }
 
  export async function getSigner (requestAccounts = true){
     const provider = getBrowserProvider();
     if(requestAccounts){
-        await provider.send("eth_requestAccount" , []);//provider is your connection to the blockchain
+        await provider.send("eth_requestAccounts" , []);//provider is your connection to the blockchain
     }
     const signer = await provider.getSigner();//it means get the account connected to this provider and has the ability to sign the transactions
     await ensureExpectedNetwork(provider);//whether connected to the corrected network
@@ -27,7 +27,7 @@ export function getBrowserProvider(){//basically this function ensures that the 
 // this prevents the mistakes of sending the transaction on ethereum instead of polygon
   export async function ensureExpectedNetwork(provider){//gets the current network wallet is connected to
     const network = await provider.getNetwork();
-    const chainId = Number(number.chainId);
+    const chainId = Number(network.chainId);
 
     if(EXPECTED_CHAIN_ID && chainId != EXPECTED_CHAIN_ID){//compares the network to expected chain id
         try {
@@ -44,8 +44,8 @@ export function getBrowserProvider(){//basically this function ensures that the 
   // providing flexibility to take issuerRegistry pr address+abi object
 
 function resolveContract(nameOrObject){
-    if(typeof(nameOrObject === "string")){
-        if(!contract[nameOrObject]){
+    if(typeof nameOrObject === "string"){
+        if(!contracts[nameOrObject]){
             throw new Error(` contracts.json has no key "${nameOrObject}"`);
         }
         return contracts[nameOrObject];
