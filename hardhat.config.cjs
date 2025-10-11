@@ -1,6 +1,6 @@
 require("@nomiclabs/hardhat-ethers");
 require("dotenv").config();
-const { PRIVATE_KEY, POLYGON_RPC } = process.env;
+const { PRIVATE_KEY } = process.env;
 module.exports = {
   solidity: {
     version: "0.8.30",
@@ -8,9 +8,9 @@ module.exports = {
   },
   networks: {
     hardhat: {},
-    polygon: {
-      url: process.env.RPC_URL || "",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
+    amoy: {
+      url: "https://rpc-amoy.polygon.technology",
+      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : []
     }
   }
 };
