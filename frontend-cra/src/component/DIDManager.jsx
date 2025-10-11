@@ -8,12 +8,6 @@ const DIDManager = ({ userId }) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  useEffect(() => {
-    if (userId) {
-      fetchDIDData()
-    }
-  }, [userId])
-
   const fetchDIDData = async () => {
     try {
       setLoading(true)
@@ -25,6 +19,13 @@ const DIDManager = ({ userId }) => {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (userId) {
+      fetchDIDData()
+    }
+  }, [userId])
+
 
   if (loading) {
     return (

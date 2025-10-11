@@ -3,9 +3,8 @@ import { AuthService } from "./services/auth.js"
 import Navbar from "./component/Navbar"
 import Login from "./pages/Login"
 import IssuerDashboard from "./pages/IssuerDashboard.jsx"
-import UserDashboard from "./pages/UserDashBoard";
-import Profile from "./pages/Profile";
-
+import UserDashboard from "./pages/UserDashBoard"
+import Profile from "./pages/Profile"
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
