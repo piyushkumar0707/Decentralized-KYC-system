@@ -8,10 +8,14 @@ async function main() {
   console.log("🚀 Deploying CredentialRegistry with account:", deployer.address);
   console.log("💰 Deployer balance:", (await deployer.getBalance()).toString());
 
-  // Read IssuerRegistry address from .env
-  const issuerRegistryAddress = process.env.ISSUER_REGISTRY_ADDRESS;
-  if (!issuerRegistryAddress) {
-    throw new Error("❌ Please set ISSUER_REGISTRY_ADDRESS in your .env file");
+  // Read IssuerRegistry address from deployments.json
+  const deploymentsFile = path.join(__dirname, "deployments.json");
+  const deployments = JSON.parse(fs.readFileSync(deploymentsFile, "utf8"));
+  const issuerRegistryAddress = deployments.IssuerRegistry;
+  if (!issuerRegistryAddress || !issuerRegistryAddress.startsWith("0x")) {
+    throw new Error(
+      `❌ Invalid IssuerRegistry address in deployments.json: ${issuerRegistryAddress}`
+    );
   }
   console.log("📌 Using IssuerRegistry at:", issuerRegistryAddress);
 
