@@ -1,6 +1,6 @@
 {
   "issuerRegistry": {
-    "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "address": "0x59F150Fe303dfA61e883dd83eee3ece295b084D5",
     "abi": [
       {
         "inputs": [
@@ -337,7 +337,7 @@
     ]
   },
   "didRegistry": {
-    "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "address": "0x3bb5c015298A9ae2138BE9Ed40E4c4c433E007B2",
     "abi": [
       {
         "inputs": [
@@ -503,7 +503,7 @@
     ]
   },
   "credentialRegistry": {
-    "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    "address": "0x254b47aC8714adE784f0a8A7015981D094570C06",
     "abi": [
       {
         "inputs": [

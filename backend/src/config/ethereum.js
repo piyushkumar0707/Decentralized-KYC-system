@@ -34,15 +34,3 @@ const issuerRegistry = makeReadContract("issuerRegistry");
 const didRegistry = makeReadContract("didRegistry");
 const credentialRegistry = makeReadContract("credentialRegistry");
 
-module.exports ={
-    provider,
-    makeReadContract,
-    issuerRegistry,
-    didRegistry,
-    credentialRegistry,
-    address :{
-        issuerRegistry : contracts.issuerRegistry?.address,
-        didRegistry : contracts.didRegistry?.address,
-        credentialRegistry : contracts.credentialRegistry?.address
-    },
-};

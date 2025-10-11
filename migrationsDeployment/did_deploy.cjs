@@ -7,10 +7,11 @@ async function main() {
   console.log("Deploying DIDRegistry with account:", deployer.address);
   console.log("Deployer balance:", (await deployer.getBalance()).toString());
 
-  // Read IssuerRegistry address from deployments.json
+  // Read IssuerRegistry address from deployments.json (using chainId as key)
   const deploymentsFile = path.join(__dirname, "deployments.json");
   const deployments = JSON.parse(fs.readFileSync(deploymentsFile, "utf8"));
-  const issuerRegistryAddress = deployments.IssuerRegistry;
+  const chainId = "80002";
+  const issuerRegistryAddress = deployments[chainId]?.IssuerRegistry;
   if (!issuerRegistryAddress || !issuerRegistryAddress.startsWith("0x")) {
     throw new Error(
       `❌ Invalid IssuerRegistry address in deployments.json: ${issuerRegistryAddress}`
