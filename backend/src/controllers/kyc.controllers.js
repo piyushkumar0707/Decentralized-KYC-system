@@ -8,6 +8,7 @@ import ApiError from '../utility/ApiError.js';
 import ApiResponse from '../utility/ApiResponse.js';
 import User from '../models/user.models.js';
 import {issueVC} from './vc.controllers.js';
+import { extractIdDocumentOcr } from '../Services/ocrClient.service.js';
 // Submit KYC
 const submitKYC = async (req, res) => {
   try {
@@ -19,6 +20,28 @@ const submitKYC = async (req, res) => {
     const buffer = fs.readFileSync(req.file.path);
 
     if (!buffer) throw new ApiError(500, "Failed to read uploaded file");
+
+    let ocrFields = {
+      name: '',
+      document: '',
+      ocr: { rawText: '', engine: 'tesseract', error: null, extractedAt: new Date() },
+    };
+    try {
+      const ocr = await extractIdDocumentOcr(req.file.path, req.file.mimetype);
+      ocrFields = {
+        name: ocr.name || '',
+        document: ocr.document_number || ocr.document || '',
+        ocr: {
+          rawText: (ocr.raw_text || '').slice(0, 50_000),
+          extractedAt: new Date(),
+          engine: 'tesseract',
+          error: null,
+        },
+      };
+    } catch (ocrErr) {
+      console.warn('OCR service error:', ocrErr.message);
+      ocrFields.ocr.error = ocrErr.message;
+    }
     // Check if user already has a pending KYC
     const existing = await KYCrequestsModels.findOne({
       user: req.user.id,
@@ -48,6 +71,9 @@ const submitKYC = async (req, res) => {
       user: req.user.id,
       did: req.body.did,
       documentType,
+      name: ocrFields.name,
+      document: ocrFields.document,
+      ocr: ocrFields.ocr,
       documentCID: ipfsHash,
       encryption: {
         algo: meta.algo,

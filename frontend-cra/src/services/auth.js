@@ -49,15 +49,15 @@ export class AuthService {
     }
   
     static getStoredToken() {
-      return localStorage.getItem("did_kyc_token")
+      return localStorage.getItem("Decentralized_kyc_token")
     }
   
     static setToken(token) {
-      localStorage.setItem("did_kyc_token", token)
+      localStorage.setItem("Decentralized_kyc_token", token)
     }
   
     static removeToken() {
-      localStorage.removeItem("did_kyc_token")
+      localStorage.removeItem("Decentralized_kyc_token")
     }
   
     static isAuthenticated() {

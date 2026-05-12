@@ -1,4 +1,5 @@
 import VCMetadata from "../models/VCmetadata.models.js";
+import KYCrequestsModels from "../models/KYCrequests.models.js";
 import AuditLog from "../models/audit_logs.models.js";
 import hash from "../Services/hash.js";
 import { uploadJsonToPinata } from "../middleware/ipfs.middleware.js";
@@ -30,7 +31,7 @@ export async function issueVC({ kyc, issuerUser }) {
   const vchash = hash(vc);
 
   //sign vc
-  const { json: vcJsonString, signature } = await signJson(vc, process.env.RSA_PRIVATE_KEY);
+  const { json: vcJsonString, signature } = await signJson(vc);
 
   // Upload VC JSON + signature to IPFS
   let cid;
@@ -44,16 +45,20 @@ export async function issueVC({ kyc, issuerUser }) {
   const txhash = await anchorCredentialOnChain(vchash);
 
 
-  // Record in database
-  const record = await recordVC({
-    issuedTo: kyc.did,
-    vchash,
-    ipfs_cid: cid,
-    issuer: issuerUser.did,
-    anchored: true,
-    txhash,
-    signature,
-  },issuerUser._id);
+  // Record in database (schema uses User ObjectIds, not DID strings)
+  const record = await recordVC(
+    {
+      issuedTo: kyc.user,
+      kyc: kyc._id,
+      vchash,
+      ipfs_cid: cid,
+      issuer: issuerUser._id,
+      anchored: true,
+      txhash,
+      signature,
+    },
+    issuerUser._id
+  );
 
   await AuditLog.create({
     action: "VC_ISSUED",
@@ -66,7 +71,25 @@ export async function issueVC({ kyc, issuerUser }) {
   return record;
 }
 
-
+/**
+ * HTTP: issue VC for an already-approved KYC (optional path; approval flow also calls issueVC).
+ */
+export async function httpIssueVC(req, res) {
+  try {
+    const { kycId } = req.body;
+    if (!kycId) throw new ApiError(400, "kycId is required");
+    const kyc = await KYCrequestsModels.findById(kycId);
+    if (!kyc) throw new ApiError(404, "KYC request not found");
+    if (kyc.status !== "approved") {
+      throw new ApiError(400, "KYC must be approved before issuing a VC");
+    }
+    const record = await issueVC({ kyc, issuerUser: req.user });
+    return res.status(201).json(new ApiResponse(201, record, "VC issued"));
+  } catch (error) {
+    const code = error.statusCode || 500;
+    return res.status(code).json(new ApiResponse(code, null, error.message || "Error"));
+  }
+}
 
 /**
  * Verify VC
@@ -78,20 +101,27 @@ export async function verifyVC(req, res, next) {
     if (!vchash) throw new ApiError(400, "vchash query parameter is required");
 
     const record = await VCMetadata.findOne({ vchash });
-    if (!record) return new ApiResponse(res, 404, "VC not found", { verified: false });
+    if (!record) {
+      return res.status(404).json({ success: false, message: "VC not found", verified: false });
+    }
 
-    // On-chain check
-    const onChain = await getRecord(vchash); // [issuer, issuedAt, revoked, revokedAt]
-    const verified = !record.revoked && !onChain[2]; // true if not revoked on-chain and in DB
+    const onChain = await getRecord(vchash);
+    const verified = !record.revoked && !onChain.revoked;
 
-    if (!verified) return new ApiResponse(res, 403, "VC is revoked", { verified });
+    if (!verified) {
+      return res.status(403).json({ success: false, message: "VC is revoked", verified: false });
+    }
 
-    return new ApiResponse(res, 200, "VC verification successful", {
-      verified,
-      anchored: record.anchored,
-      revoked: record.revoked,
-      issuedAt: record.issuedAt,
-      revokedAt: record.revokedAt,
+    return res.status(200).json({
+      success: true,
+      message: "VC verification successful",
+      data: {
+        verified,
+        anchored: record.anchored,
+        revoked: record.revoked,
+        issuedAt: record.issuedAt,
+        revokedAt: record.revokedAt,
+      },
     });
   } catch (err) {
     next(err);
@@ -110,7 +140,7 @@ export async function revokeVC(req, res, next) {
 
     // Check on-chain status
     const onChain = await getRecord(vchash);
-    const verified = !record.revoked && !onChain[2]; // onChain[2] = revoked
+    const verified = !record.revoked && !onChain.revoked;
     if (!verified) throw new ApiError(403, "VC is revoked on-chain");
 
     // Revoke on-chain
@@ -129,7 +159,7 @@ export async function revokeVC(req, res, next) {
       metadata: { vchash, txhash },
     });
 
-    return new ApiResponse(res, 200, "VC revoked successfully", { vchash, txhash });
+    return res.status(200).json({ success: true, message: "VC revoked successfully", vchash, txhash });
   } catch (err) {
     next(err);
   }
@@ -141,26 +171,31 @@ export async function getVCRecord(req, res, next) {
     if (!vchash) throw new ApiError(400, "vchash param required");
 
     const record = await VCMetadata.findOne({ vchash }).populate("issuer", "username email");
-    if (!record) return new ApiResponse(res, 404, "VC not found");
+    if (!record) {
+      return res.status(404).json({ success: false, message: "VC not found" });
+    }
 
-    // On-chain record
     let onChain;
     try {
-      onChain = await getRecord(vchash); // returns [issuer, issuedAt, revoked, revokedAt]
+      onChain = await getRecord(vchash);
     } catch (err) {
-      return new ApiResponse(res, 200, "VC metadata fetched (on-chain lookup failed)", {
+      return res.status(200).json({
+        success: true,
+        message: "VC metadata fetched (on-chain lookup failed)",
         record,
         onChainError: err.message,
       });
     }
 
-    return new ApiResponse(res, 200, "VC metadata fetched", {
+    return res.status(200).json({
+      success: true,
+      message: "VC metadata fetched",
       record,
       onChain: {
-        issuer: onChain[0],
-        issuedAt: onChain[1],
-        revoked: onChain[2],
-        revokedAt: onChain[3],
+        issuer: onChain.issuer,
+        issuedAt: onChain.issuedAt,
+        revoked: onChain.revoked,
+        revokedAt: onChain.revokedAt,
       },
     });
   } catch (err) {

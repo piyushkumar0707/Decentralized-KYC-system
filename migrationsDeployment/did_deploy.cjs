@@ -7,20 +7,28 @@ async function main() {
   console.log("Deploying DIDRegistry with account:", deployer.address);
   console.log("Deployer balance:", (await deployer.getBalance()).toString());
 
-  // Read IssuerRegistry address from deployments.json (using chainId as key)
-  const deploymentsFile = path.join(__dirname, "deployments.json");
-  const deployments = JSON.parse(fs.readFileSync(deploymentsFile, "utf8"));
-  const chainId = "80002";
-  const issuerRegistryAddress = deployments[chainId]?.IssuerRegistry;
+  const contractsJson = path.join(__dirname, "contracts.json");
+  let issuerRegistryAddress;
+  if (fs.existsSync(contractsJson)) {
+    const c = JSON.parse(fs.readFileSync(contractsJson, "utf8"));
+    issuerRegistryAddress = c.issuerRegistry?.address;
+  }
   if (!issuerRegistryAddress || !issuerRegistryAddress.startsWith("0x")) {
-    throw new Error(
-      `❌ Invalid IssuerRegistry address in deployments.json: ${issuerRegistryAddress}`
-    );
+    const deploymentsFile = path.join(__dirname, "deployments.json");
+    const deployments = JSON.parse(fs.readFileSync(deploymentsFile, "utf8"));
+    const chainId = String(hre.network.config.chainId || "");
+    issuerRegistryAddress =
+      deployments[chainId]?.IssuerRegistry ||
+      deployments["31337"]?.IssuerRegistry ||
+      deployments.IssuerRegistry ||
+      deployments.contracts?.issuerRegistry;
+  }
+  if (!issuerRegistryAddress || !issuerRegistryAddress.startsWith("0x")) {
+    throw new Error("Could not resolve IssuerRegistry address (contracts.json or deployments.json).");
   }
   console.log("Using IssuerRegistry at:", issuerRegistryAddress);
 
-  // Load DIDRegistry contract
-  const DIDRegistry = await hre.ethers.getContractFactory("DIDRegistry");
+  const DIDRegistry = await hre.ethers.getContractFactory("contracts/DIDRegistry.sol:DIDRegistry");
 
   // Deploy with IssuerRegistry address
   const didRegistry = await DIDRegistry.deploy(issuerRegistryAddress);
