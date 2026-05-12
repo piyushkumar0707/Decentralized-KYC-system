@@ -50,12 +50,12 @@ contract DIDRegistry{
   function registerDID(address user , string calldata _didURI)external{
       require(bytes(_didURI).length > 0, "DID URI required");
       string memory old = _didOf[user];
-      _didOf[msg.sender] = _didURI; // assigning did to given user
+      _didOf[user] = _didURI; // assigning did to given user
 
       if(bytes(old).length == 0){
         emit DIDRegistered(user , _didURI);
       } else {
-        emit DIDUpdated(msg.sender , old , _didURI);
+        emit DIDUpdated(user , old , _didURI);
       }
   } 
 

@@ -15,6 +15,8 @@ import vc from './src/routes/vc.routes.js';
 const allowedOrigins = [
     process.env.CORS_ORIGIN,
     "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:3002",
     "http://127.0.0.1:3000",
 ].filter(Boolean);
 
@@ -119,5 +121,16 @@ app.use('/api/user', user);
 app.use('/api/did', did);
 app.use('/api/kyc', kyc);
 app.use('/api/vc', vc);
+
+app.use((err, req, res, next) => {
+    const statusCode = err.statusCode || 500;
+    res.status(statusCode).json({
+        statusCode,
+        data: null,
+        message: err.message || "Internal Server Error",
+        success: false,
+        errors: err.errors || [],
+    });
+});
 
 export default app;

@@ -4,29 +4,34 @@ import { uploadJsonToPinata } from "../middleware/ipfs.middleware.js";
 import ApiError from "../utility/ApiError.js";
 import ApiResponse from "../utility/ApiResponse.js";
 import User from "../models/user.models.js";
+import { ethers } from "ethers";
 import { isOnChainIssuer } from "../Services/blockChain.services.js";
 import {
   registerDIDOnChain,
   revokeDIDOnChain as issuerRevokeDIDOnChain,
   getDIDOnChain,
 } from "../Services/blockChain.services.js";
+import { wallet as backendWallet } from "../config/blockchain.js";
 
 const registerDID = async (req, res, next) => {
   try {
     const { userId } = req.body;
-    const user = await User.findById(userId);
+    const user = ethers.utils.isAddress(userId)
+      ? await User.findOne({ wallet: userId.toLowerCase() })
+      : await User.findById(userId);
     if (!user) throw new ApiError(404, "User not found");
+    if (!user.wallet) throw new ApiError(400, "User wallet address is required");
 
     // Check if DID already exists
-    const existing = await DIDModels.findOne({ user: userId });
+    const existing = await DIDModels.findOne({ user: user._id });
     if (existing)
       return res.json(new ApiResponse(200, existing, "DID already exists"));
 
-    const issuerAddress = req.user.wallet;
-    if (!issuerAddress || !(await isOnChainIssuer(issuerAddress))) {
+    if (!(await isOnChainIssuer(backendWallet.address))) {
       throw new ApiError(500, "Issuer not recognized on blockchain");
     }
-    const did = `did:ethr:${issuerAddress.toLowerCase()}:${user._id.toString()}`;
+    const userAddress = user.wallet.toLowerCase();
+    const did = `did:ethr:${userAddress}:${user._id.toString()}`;
 
 
    
@@ -39,16 +44,16 @@ const registerDID = async (req, res, next) => {
           id: `${did}#keys-1`,
           type: "EcdsaSecp256k1VerificationKey2019",
           controller: did,
-          blockchainAccountId: user._id.toString()
+          blockchainAccountId: userAddress
         }
       ]
     };
     const cid = await uploadJsonToPinata(didDocument, `did-${did}`);
-    const txHash = await registerDIDOnChain(userId.toString(), did);
+    const txHash = await registerDIDOnChain(userAddress, did);
     const rec = await DIDModels.create({
       user: user._id,
       did,
-      didAddress: user._id.toString(),
+      didAddress: userAddress,
       didDocumentCID: cid
     });
 
@@ -63,7 +68,8 @@ const registerDID = async (req, res, next) => {
     });
 return res.json(new ApiResponse(200, { 
   did, 
-  didAddress: user._id.toString(), 
+  didAddress: userAddress,
+  txHash,
   didDocumentCID: cid 
 }));
   } catch (error) {
@@ -74,14 +80,20 @@ return res.json(new ApiResponse(200, {
 const getUser = async (req, res, next) => {
   try {
     const { userId } = req.query;
-    const id=userId || req.user._id;
-    const rec = await DIDModels.findOne({ user: id });
+    const user = userId
+      ? ethers.utils.isAddress(userId)
+        ? await User.findOne({ wallet: userId.toLowerCase() })
+        : await User.findById(userId)
+      : await User.findById(req.user._id);
+    if (!user) throw new ApiError(404, "User not found");
+
+    const rec = await DIDModels.findOne({ user: user._id });
     if (!rec) throw new ApiError(404, "DID not found");
 
-    const did = await getDIDOnChain(id);
+    const did = await getDIDOnChain(user.wallet);
 
   return res.json(new ApiResponse(200, {
-      did: rec.did,
+      did: did || rec.did,
       didAddress: rec.didAddress,
       ipfsCid: rec.didDocumentCID
     }));
@@ -92,16 +104,17 @@ const getUser = async (req, res, next) => {
 
 const revoke=async(req,res,next)=>{
  const {userId,reason}=req.body;
- const user=await User.findById(userId);
+ const user=ethers.utils.isAddress(userId)
+   ? await User.findOne({ wallet: userId.toLowerCase() })
+   : await User.findById(userId);
  if(!user) throw new ApiError(404,"User not found");
 
- const rec=await DIDModels.findOne({user:userId});
+ const rec=await DIDModels.findOne({user:user._id});
  if(!rec) throw new ApiError(404,"DID not found");
-     const issuerAddress = req.user.wallet;
-    if (!issuerAddress || !(await isOnChainIssuer(issuerAddress))) {
+    if (!(await isOnChainIssuer(backendWallet.address))) {
       throw new ApiError(403, "Caller not recognized as issuer");
     }
- const txHash=await issuerRevokeDIDOnChain(userId.toString());
+ const txHash=await issuerRevokeDIDOnChain(user.wallet);
 
   await DIDModels.findByIdAndDelete(rec._id);
  await audit_logsModels.create({

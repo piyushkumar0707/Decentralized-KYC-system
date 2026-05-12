@@ -76,8 +76,8 @@
       ]
     },
     "C:\\Users\\121pi\\Desktop\\EKYC SYSTEM\\Decentralized-KYC-system\\contracts\\DIDRegistry.sol": {
-      "lastModificationDate": 1778590910320,
-      "contentHash": "32d5d5de1938402f910cdd05bbd9f5ba",
+      "lastModificationDate": 1778605240537,
+      "contentHash": "bc0537a4251209d3c1d047581ba582bc",
       "sourceName": "contracts/DIDRegistry.sol",
       "solcConfig": {
         "version": "0.8.30",

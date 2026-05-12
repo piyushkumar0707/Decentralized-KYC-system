@@ -13,10 +13,13 @@ const pinata = new pinataSDK({
   // pinataJWTKey: process.env.PINATA_JWT
 });
 
+const shouldUseMockCid = () => process.env.NODE_ENV !== "production";
+const mockCid = (prefix) => `${prefix}-${Date.now()}`;
+
 const uploadFileBufferToPinata = async (buffer, name = "file") => {
   if (!process.env.PINATA_API_KEY) {
     console.log(`[IPFS Mock] Skipped pinning file ${name} - missing Pinata keys. Returning mock CID.`);
-    return `mock-cid-${Date.now()}`;
+    return mockCid("mock-cid");
   }
   try {
     const stream = streamifier.createReadStream(buffer);
@@ -25,6 +28,10 @@ const uploadFileBufferToPinata = async (buffer, name = "file") => {
     });
     return res.IpfsHash;
   } catch (error) {
+    if (shouldUseMockCid()) {
+      console.warn(`[IPFS Mock] Pinata file upload failed for ${name}. Returning mock CID for local testing.`);
+      return mockCid("mock-cid");
+    }
     throw new ApiError(400, "Something went wrong with the pinata (file)");
   }
 };
@@ -32,7 +39,7 @@ const uploadFileBufferToPinata = async (buffer, name = "file") => {
 const uploadJsonToPinata = async (json, name = "json") => {
   if (!process.env.PINATA_API_KEY) {
     console.log(`[IPFS Mock] Skipped pinning JSON ${name} - missing Pinata keys. Returning mock CID.`);
-    return `mock-json-cid-${Date.now()}`;
+    return mockCid("mock-json-cid");
   }
   try {
     const res = await pinata.pinJSONToIPFS(json, {
@@ -40,6 +47,10 @@ const uploadJsonToPinata = async (json, name = "json") => {
     });
     return res.IpfsHash;
   } catch (error) {
+    if (shouldUseMockCid()) {
+      console.warn(`[IPFS Mock] Pinata JSON upload failed for ${name}. Returning mock CID for local testing.`);
+      return mockCid("mock-json-cid");
+    }
     throw new ApiError(400, "Something went wrong with the pinata (json)");
   }
 };

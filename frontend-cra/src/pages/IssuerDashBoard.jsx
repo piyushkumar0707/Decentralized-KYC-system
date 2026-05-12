@@ -8,7 +8,7 @@ const IssuerDashboard = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
-  const [newUserId, setNewUserId] = useState("")
+  const [newUserWallet, setNewUserWallet] = useState("")
   const [registering, setRegistering] = useState(false)
   const [revokeData, setRevokeData] = useState({ userId: "", reason: "" })
   const [revoking, setRevoking] = useState(false)
@@ -31,19 +31,19 @@ const IssuerDashboard = () => {
 
   const handleRegisterDID = async (e) => {
     e.preventDefault()
-    if (!newUserId.trim()) return
+    if (!newUserWallet.trim()) return
 
     setRegistering(true)
     setError("")
     setSuccess("")
 
     try {
-      await apiService.registerDID(newUserId.trim())
-      setSuccess(`DID registered successfully for user: ${newUserId}`)
-      setNewUserId("")
+      await apiService.registerDID(newUserWallet.trim())
+      setSuccess(`DID registered successfully for wallet: ${newUserWallet}`)
+      setNewUserWallet("")
       fetchUsers() // Refresh the list
     } catch (err) {
-      setError("Failed to register DID: " + err.message)
+      setError("Failed to register DID: " + (err.response?.data?.message || err.message))
     } finally {
       setRegistering(false)
     }
@@ -65,7 +65,7 @@ const IssuerDashboard = () => {
       setRevokeData({ userId: "", reason: "" })
       fetchUsers() // Refresh the list
     } catch (err) {
-      setError("Failed to revoke DID: " + err.message)
+      setError("Failed to revoke DID: " + (err.response?.data?.message || err.message))
     } finally {
       setRevoking(false)
     }
@@ -91,15 +91,15 @@ const IssuerDashboard = () => {
         <form onSubmit={handleRegisterDID} className="flex gap-4">
           <input
             type="text"
-            value={newUserId}
-            onChange={(e) => setNewUserId(e.target.value)}
-            placeholder="Enter User ID"
+            value={newUserWallet}
+            onChange={(e) => setNewUserWallet(e.target.value)}
+            placeholder="Enter user wallet address"
             className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           />
           <button
             type="submit"
-            disabled={registering || !newUserId.trim()}
+            disabled={registering || !newUserWallet.trim()}
             className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-2 rounded-md transition-colors duration-200"
           >
             {registering ? "Registering..." : "Register DID"}
@@ -126,7 +126,7 @@ const IssuerDashboard = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    User ID
+                    Wallet
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     DID
@@ -141,8 +141,10 @@ const IssuerDashboard = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {users.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.id}</td>
+                  <tr key={user._id || user.wallet} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {user.wallet || user._id}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {user.did ? (
                         <span className="font-mono text-xs">{user.did.slice(0, 20)}...</span>
@@ -169,16 +171,16 @@ const IssuerDashboard = () => {
                           <input
                             type="text"
                             placeholder="Revocation reason"
-                            value={revokeData.userId === user.id ? revokeData.reason : ""}
-                            onChange={(e) => setRevokeData({ userId: user.id, reason: e.target.value })}
+                            value={revokeData.userId === (user.wallet || user._id) ? revokeData.reason : ""}
+                            onChange={(e) => setRevokeData({ userId: user.wallet || user._id, reason: e.target.value })}
                             className="px-2 py-1 text-xs border border-gray-300 rounded"
                           />
                           <button
-                            onClick={() => handleRevokeDID(user.id, revokeData.reason)}
-                            disabled={revoking || !revokeData.reason.trim() || revokeData.userId !== user.id}
+                            onClick={() => handleRevokeDID(user.wallet || user._id, revokeData.reason)}
+                            disabled={revoking || !revokeData.reason.trim() || revokeData.userId !== (user.wallet || user._id)}
                             className="bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-3 py-1 text-xs rounded transition-colors duration-200"
                           >
-                            {revoking && revokeData.userId === user.id ? "Revoking..." : "Revoke"}
+                            {revoking && revokeData.userId === (user.wallet || user._id) ? "Revoking..." : "Revoke"}
                           </button>
                         </div>
                       )}
