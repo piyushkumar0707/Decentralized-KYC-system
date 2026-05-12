@@ -18,6 +18,7 @@ const allowedOrigins = [
     "http://localhost:3001",
     "http://localhost:3002",
     "http://127.0.0.1:3000",
+    "https://decentralized-kyc-system-two.vercel.app"
 ].filter(Boolean);
 
 app.use(cors({
