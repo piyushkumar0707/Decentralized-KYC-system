@@ -20,17 +20,28 @@ const Login = () => {
       const address = await AuthService.connectWallet()
       setWalletAddress(address)
 
-      // Authenticate user
-      const authData = await AuthService.authenticateUser(address)
+      // Get nonce from backend
+      const nonceRes = await apiService.getNonce(address)
+      const nonce = nonceRes.data.nonce
+
+      // Convert message to hex for MetaMask personal_sign
+      const hexMessage = '0x' + Array.from(nonce).map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('')
+
+      // Sign the nonce
+      const signature = await AuthService.signMessage(address, hexMessage)
 
       // Verify with backend
-      const response = await apiService.verifyUser(authData.address, authData.message, authData.signature)
+      const response = await apiService.verifyUser(address, signature)
 
       // Store JWT token
-      AuthService.setToken(response.token)
+      AuthService.setToken(response.data.accessToken)
 
-      // Redirect to dashboard
-      navigate("/user")
+      // Redirect to dashboard (Check role for routing if needed)
+      if (response.data.role === "issuer") {
+        navigate("/issuer")
+      } else {
+        navigate("/user")
+      }
     } catch (err) {
       setError(err.message)
     } finally {

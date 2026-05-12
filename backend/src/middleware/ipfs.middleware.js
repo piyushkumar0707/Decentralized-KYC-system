@@ -14,6 +14,10 @@ const pinata = new pinataSDK({
 });
 
 const uploadFileBufferToPinata = async (buffer, name = "file") => {
+  if (!process.env.PINATA_API_KEY) {
+    console.log(`[IPFS Mock] Skipped pinning file ${name} - missing Pinata keys. Returning mock CID.`);
+    return `mock-cid-${Date.now()}`;
+  }
   try {
     const stream = streamifier.createReadStream(buffer);
     const res = await pinata.pinFileToIPFS(stream, {
@@ -26,6 +30,10 @@ const uploadFileBufferToPinata = async (buffer, name = "file") => {
 };
 
 const uploadJsonToPinata = async (json, name = "json") => {
+  if (!process.env.PINATA_API_KEY) {
+    console.log(`[IPFS Mock] Skipped pinning JSON ${name} - missing Pinata keys. Returning mock CID.`);
+    return `mock-json-cid-${Date.now()}`;
+  }
   try {
     const res = await pinata.pinJSONToIPFS(json, {
       pinataMetadata: { name },

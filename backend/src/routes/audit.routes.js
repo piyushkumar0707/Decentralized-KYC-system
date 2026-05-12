@@ -5,6 +5,6 @@ import {authorizeRoles} from "../middleware/premission.middleware.js";
 
 const router = express.Router();
 
-router.get("/list", verifyJWT, authorizeRoles("admin"), list);
+router.get("/list", verifyJWT, list);
 
 export default router;

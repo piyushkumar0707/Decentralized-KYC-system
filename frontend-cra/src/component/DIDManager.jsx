@@ -14,7 +14,12 @@ const DIDManager = ({ userId }) => {
       const response = await apiService.getUserDID(userId)
       setDidData(response)
     } catch (err) {
-      setError("Failed to fetch DID data: " + err.message)
+      if (err.response && err.response.status === 404) {
+        // 404 means no DID registered yet, which is expected for new users.
+        setDidData(null)
+      } else {
+        setError("Failed to fetch DID data: " + err.message)
+      }
     } finally {
       setLoading(false)
     }

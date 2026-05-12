@@ -32,10 +32,14 @@ api.interceptors.response.use(
 
 export const apiService = {
   // Authentication
-  async verifyUser(address, message, signature) {
+  async getNonce(address) {
+    const response = await api.post("/api/user/nonce", { address })
+    return response.data
+  },
+
+  async verifyUser(address, signature) {
     const response = await api.post("/api/user/verify", {
       address,
-      message,
       signature,
     })
     return response.data
@@ -48,8 +52,9 @@ export const apiService = {
   },
 
   async getUserDID(userId) {
-    const response = await api.get(`/api/did/getUser?userId=${userId}`)
-    return response.data
+    const query = (userId && userId !== "user123") ? `?userId=${userId}` : ""
+    const response = await api.get(`/api/did/user${query}`)
+    return response.data.data
   },
 
   async revokeDID(userId, reason) {
@@ -58,22 +63,22 @@ export const apiService = {
   },
 
   async updatePrivacy(userId, privacySettings) {
-    const response = await api.post("/api/did/updatePrivacy", {
-      userId,
-      privacySettings,
-    })
+    const payload = { privacySettings }
+    if (userId && userId !== "user123") payload.userId = userId
+    const response = await api.post("/api/did/updatePrivacy", payload)
     return response.data
   },
 
   // User Management
   async getAllUsers() {
-    const response = await api.get("/api/users")
-    return response.data
+    const response = await api.get("/api/user")
+    return response.data.data
   },
 
   async getAuditLogs(userId) {
-    const response = await api.get(`/api/audit-logs?userId=${userId}`)
-    return response.data
+    const query = (userId && userId !== "user123") ? `?userId=${userId}` : ""
+    const response = await api.get(`/api/audit/list${query}`)
+    return response.data.data
   },
 }
 

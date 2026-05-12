@@ -130,7 +130,8 @@ const walletNonce = async (req, res) => {
     user = await User.create({ wallet: address.toLowerCase() });
   }
 
-  const nonce = crypto.randomBytes(32).toString("hex");
+  const randomHex = crypto.randomBytes(32).toString("hex");
+  const nonce = `Welcome to DID KYC System!\n\nPlease sign this message to authenticate.\nNonce: ${randomHex}`;
   user.nonce = nonce;
   await user.save();
 
@@ -212,6 +213,16 @@ const getUserProfile = async (req, res) => {
   }
 };
 
+// Get all users
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password -refreshToken");
+    return res.status(200).json(new ApiResponse(200, { users }, "Users fetched successfully"));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export {
   refreshAccessToken,
   registerUser,
@@ -219,5 +230,6 @@ export {
   logout,
   walletNonce,
   walletVerify,
-  getUserProfile
+  getUserProfile,
+  getAllUsers
 };

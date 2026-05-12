@@ -85,9 +85,8 @@ const getUser = async (req, res, next) => {
       didAddress: rec.didAddress,
       ipfsCid: rec.didDocumentCID
     }));
-    } catch (error) {
+  } catch (error) {
     next(error);
-    throw new ApiError(400, "DID FAILED");
   }
 };
 

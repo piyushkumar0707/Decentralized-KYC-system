@@ -32,7 +32,7 @@ const Profile = () => {
 
       // Fetch audit logs
       const response = await apiService.getAuditLogs(storedUserId)
-      setAuditLogs(response.logs || [])
+      setAuditLogs(response || [])
     } catch (err) {
       setError("Failed to load profile data: " + err.message)
     } finally {

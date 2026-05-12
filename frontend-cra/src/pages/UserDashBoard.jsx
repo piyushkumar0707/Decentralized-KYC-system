@@ -20,7 +20,7 @@ const UserDashboard = () => {
   useEffect(() => {
     // Get user ID from localStorage or context
     // For demo purposes, we'll use a default or prompt user
-    const storedUserId = localStorage.getItem("currentUserId") || "user123"
+    const storedUserId = localStorage.getItem("currentUserId") || ""
     setUserId(storedUserId)
 
     // Load privacy settings

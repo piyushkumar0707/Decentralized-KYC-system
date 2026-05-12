@@ -32,9 +32,8 @@ const userSchema = new mongoose.Schema(
     },
      did: {
             type: String, // Corrected from ObjectId to String
-            default: null,
             unique: true,
-            sparse: true, // Allows multiple null values
+            sparse: true, // Allows multiple null values when not set
         },
     wallet:{
       type:String,

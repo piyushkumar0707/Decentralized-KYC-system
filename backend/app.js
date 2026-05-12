@@ -12,8 +12,19 @@ import did from './src/routes/did.routes.js';
 import kyc from './src/routes/kyc.routes.js';
 import vc from './src/routes/vc.routes.js';
 
+const allowedOrigins = [
+    process.env.CORS_ORIGIN,
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+].filter(Boolean);
+
 app.use(cors({
-    origin:process.env.CORS_ORIGIN,
+    origin(origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error(`CORS origin not allowed: ${origin}`));
+    },
     credentials:true
 }));
 
@@ -95,6 +106,7 @@ app.post('/webhook', verifyWebhookMiddleware(WEBHOOK_TOKEN, SECRET, MAX_TIME_DIF
     res.status(200).send('Webhook received successfully');
 });
 
+app.use(cookieParser());
 app.use(express.static("public"));
 
 app.get('/health', (req, res) => {
@@ -107,7 +119,5 @@ app.use('/api/user', user);
 app.use('/api/did', did);
 app.use('/api/kyc', kyc);
 app.use('/api/vc', vc);
-
-app.use(cookieParser());
 
 export default app;
