@@ -8,6 +8,9 @@ module.exports = {
   },
   networks: {
     hardhat: {},
+    localhost: {
+      url: "http://127.0.0.1:8545",
+    },
     amoy: {
       url: "https://rpc-amoy.polygon.technology",
       accounts: PRIVATE_KEY ? [PRIVATE_KEY] : []

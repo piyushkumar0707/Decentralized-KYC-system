@@ -6,7 +6,8 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "node": "hardhat node",
-    "deploy:local": "hardhat run scripts/deploy.js --network localhost"
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "grant:issuer": "hardhat run scripts/grant-issuer.cjs --network localhost"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.2.3",

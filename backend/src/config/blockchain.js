@@ -13,8 +13,12 @@ const __dirname = path.dirname(__filename);
 const contractPath = path.resolve(__dirname, "../../../migrationsDeployment/contracts.json");
 const contracts = JSON.parse(fs.readFileSync(contractPath, "utf-8"));
 
-// Blockchain provider + signer
-const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
+// Blockchain provider + signer (RPC_URL preferred; BLOCKCHAIN_RPC_URL supported for legacy .env)
+const rpcUrl = process.env.RPC_URL || process.env.BLOCKCHAIN_RPC_URL;
+if (!rpcUrl) {
+  throw new Error("Set RPC_URL (or BLOCKCHAIN_RPC_URL) for blockchain connectivity.");
+}
+const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
 const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 
 // Helper: load contract using ABI + address from contracts.json

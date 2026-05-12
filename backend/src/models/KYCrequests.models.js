@@ -1,5 +1,12 @@
 import mongoose from 'mongoose';
 
+const ocrSchema = new mongoose.Schema({
+  rawText: { type: String, default: '' },
+  extractedAt: { type: Date },
+  engine: { type: String, default: 'tesseract' },
+  error: { type: String, default: null },
+}, { _id: false });
+
 const encryptionSchema = new mongoose.Schema({
   algo: { type: String, required: true }, // e.g., 'rsa-oaep'
   keywrapped: { type: String, required: true }, // base64-wrapped encryption key
@@ -23,6 +30,20 @@ const kycSchema = new mongoose.Schema({
   documentType: {
     type: String,
     required: true // e.g., 'passport', 'driver_license'
+  },
+  /** Display / legal name from OCR (used in VC credentialSubject) */
+  name: {
+    type: String,
+    default: ''
+  },
+  /** Primary document number from OCR (used in VC credentialSubject.document) */
+  document: {
+    type: String,
+    default: ''
+  },
+  ocr: {
+    type: ocrSchema,
+    default: () => ({})
   },
   documentCID: {
     type: String,

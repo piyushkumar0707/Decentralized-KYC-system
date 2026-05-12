@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  issueVC,
+  httpIssueVC,
   revokeVC,
   verifyVC,
   getVCRecord
@@ -12,7 +12,7 @@ import {authorizeRoles} from "../middleware/premission.middleware.js";
 const router = express.Router();
 
 // Issue VC (only issuer)
-router.post("/issue",verifyJWT, authorizeRoles("issuer"), issueVC);
+router.post("/issue", verifyJWT, authorizeRoles("issuer"), httpIssueVC);
 
 // Revoke VC (only issuer)
 router.post("/revoke", verifyJWT, authorizeRoles("issuer"), revokeVC);

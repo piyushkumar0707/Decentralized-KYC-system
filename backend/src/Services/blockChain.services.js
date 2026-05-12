@@ -39,7 +39,7 @@ export async function registerIssuerOnChain(issuerAddress, metadataURI) {
 }
 
 export async function isOnChainIssuer(issuerAddress) {
-  return await IssuerRegistry.isRegistered(issuerAddress);
+  return await IssuerRegistry.isIssuer(issuerAddress);
 }
 
 export async function getRecord(vcHash) {
